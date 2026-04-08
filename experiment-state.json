@@ -2,13 +2,19 @@
   "project": "uwb-rti",
   "current_phase": 1,
   "phase_name": "forward-model",
-  "status": "not_started",
+  "status": "in_progress",
   "phases": {
     "1": {
       "name": "forward-model",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["config.py", "forward_model.py"],
-      "results": {}
+      "results": {
+        "W_shape": [16, 900],
+        "Pi_shape": [900, 16],
+        "W_nonzero_pct": 9.9,
+        "rss_empty_room_mean_dB": 86,
+        "pixel_area_correction": true
+      }
     },
     "2": {
       "name": "model-validation",
@@ -70,7 +76,7 @@
     }
   },
   "active_hyperparameters": {
-    "tikhonov_alpha_reg": null,
+    "tikhonov_alpha_reg": 1.0,
     "loss_ssim_lambda": 0.1,
     "learning_rate": 1e-3,
     "batch_size": 64,
@@ -80,5 +86,5 @@
     "scheduler_factor": 0.5
   },
   "decisions_log": [],
-  "last_updated": null
+  "last_updated": "2026-04-08T00:00:00Z"
 }

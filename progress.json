@@ -5,36 +5,36 @@
       "phase": 1,
       "title": "Implement config.py",
       "description": "All constants: node positions, UWB parameters, pixel grid, parameter ranges",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Verified: pixel centers (0.05-2.95), TX-RX distances (3.0-4.24m), wavelength=0.03756m, beta_min=0.001878m, dataset split 48k/6k/6k"
     },
     {
       "id": "1.2",
       "phase": 1,
       "title": "Implement forward_model.py — weight matrix W",
       "description": "Inverse Area Elliptical Model, compute W (16×900) with β bounds and Fresnel zone",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "W (16x900) verified: ~10% nonzero, pixel area factor included for discrete summation, max weight 1.07, sum per link 1.2-2.3"
     },
     {
       "id": "1.3",
       "phase": 1,
       "title": "Implement forward_model.py — Tikhonov matrix Π",
       "description": "Π = (W^T W + α·I)^{-1} · W^T, verify dimensions (900×16)",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Pi (900x16) verified: uses np.linalg.solve for numerical stability, synthetic reconstruction shows spatial prior (center 0.12 vs background 0.008)"
     },
     {
       "id": "1.4",
       "phase": 1,
       "title": "Implement forward_model.py — RSS generation",
       "description": "y = Z·b - c·W·θ - α·d + ε, with parameter sampling",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "RSS verified: empty room ~86dB, 5x5 object drops ~1dB, shadowing max ~6dB. Parameters sampled from config ranges."
     },
     {
       "id": "2.1",
