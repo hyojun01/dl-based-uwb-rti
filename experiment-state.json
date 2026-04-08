@@ -1,0 +1,84 @@
+{
+  "project": "uwb-rti",
+  "current_phase": 1,
+  "phase_name": "forward-model",
+  "status": "not_started",
+  "phases": {
+    "1": {
+      "name": "forward-model",
+      "status": "not_started",
+      "modules": ["config.py", "forward_model.py"],
+      "results": {}
+    },
+    "2": {
+      "name": "model-validation",
+      "status": "not_started",
+      "modules": ["validate_model.py"],
+      "results": {},
+      "validations": {
+        "rss_vs_distance": null,
+        "rss_human_crossing": null
+      }
+    },
+    "3": {
+      "name": "data-generation",
+      "status": "not_started",
+      "modules": ["data_generator.py"],
+      "results": {},
+      "dataset": {
+        "total_samples": null,
+        "split": { "train": null, "val": null, "test": null },
+        "generation_time_sec": null
+      }
+    },
+    "4": {
+      "name": "dl-components",
+      "status": "not_started",
+      "modules": [
+        "models/tikhonov_branch.py",
+        "models/fc_branch.py",
+        "models/unet.py",
+        "models/dual_branch_unet.py",
+        "models/tikhonov_only.py",
+        "models/fc_only.py"
+      ],
+      "results": {}
+    },
+    "5": {
+      "name": "training",
+      "status": "not_started",
+      "modules": ["train.py"],
+      "results": {},
+      "training_runs": []
+    },
+    "6": {
+      "name": "evaluation",
+      "status": "not_started",
+      "modules": ["evaluate.py"],
+      "results": {},
+      "metrics": {
+        "proposed": { "mse": null, "psnr": null, "ssim": null, "rmse": null },
+        "tikhonov_only": { "mse": null, "psnr": null, "ssim": null, "rmse": null },
+        "fc_only": { "mse": null, "psnr": null, "ssim": null, "rmse": null }
+      }
+    },
+    "7": {
+      "name": "visualization",
+      "status": "not_started",
+      "modules": ["visualize.py"],
+      "results": {}
+    }
+  },
+  "active_hyperparameters": {
+    "tikhonov_alpha_reg": null,
+    "loss_ssim_lambda": 0.1,
+    "learning_rate": 1e-3,
+    "batch_size": 64,
+    "max_epochs": 200,
+    "early_stopping_patience": 20,
+    "scheduler_patience": 10,
+    "scheduler_factor": 0.5
+  },
+  "decisions_log": [],
+  "last_updated": null
+}

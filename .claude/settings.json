@@ -1,0 +1,77 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(python3 *)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(find *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(diff *)",
+      "Bash(nvidia-smi)",
+      "Bash(du *)",
+      "Bash(cd *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(shutdown *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); file=$(echo \"$input\" | jq -r '.tool_input.file_path // empty'); if [ \"$file\" = 'experiment-state.json' ] || [ \"$file\" = 'progress.json' ]; then ts=$(date -Iseconds); backup=\"logs/state-backup-${ts}.json\"; cp \"$file\" \"$backup\" 2>/dev/null; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'python3?.*train\\.py'; then echo '{\"event\": \"training_run\", \"command\": \"'\"$cmd\"'\", \"timestamp\": \"'$(date -Iseconds)'\"}' >> logs/training-runs.jsonl; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before context compaction: save all critical state to experiment-state.json and progress.json. Include: current task ID, any partial results, decisions made, and next steps. This is essential for session continuity."
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Reminder: Read experiment-state.json and progress.json to check current phase and next task. Do not repeat completed work. Ask for human approval before phase transitions."
+          }
+        ]
+      }
+    ]
+  }
+}

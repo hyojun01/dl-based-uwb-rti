@@ -1,0 +1,249 @@
+{
+  "tasks": [
+    {
+      "id": "1.1",
+      "phase": 1,
+      "title": "Implement config.py",
+      "description": "All constants: node positions, UWB parameters, pixel grid, parameter ranges",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "1.2",
+      "phase": 1,
+      "title": "Implement forward_model.py — weight matrix W",
+      "description": "Inverse Area Elliptical Model, compute W (16×900) with β bounds and Fresnel zone",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "1.3",
+      "phase": 1,
+      "title": "Implement forward_model.py — Tikhonov matrix Π",
+      "description": "Π = (W^T W + α·I)^{-1} · W^T, verify dimensions (900×16)",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "1.4",
+      "phase": 1,
+      "title": "Implement forward_model.py — RSS generation",
+      "description": "y = Z·b - c·W·θ - α·d + ε, with parameter sampling",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "2.1",
+      "phase": 2,
+      "title": "Validation: RSS vs Distance (no shadowing)",
+      "description": "1 TX, 1 RX, vary D from 0.5m to 5m, plot theoretical RSS curve",
+      "status": "not_started",
+      "verified": false,
+      "verification_criteria": "RSS decreases logarithmically with distance",
+      "notes": ""
+    },
+    {
+      "id": "2.2",
+      "phase": 2,
+      "title": "Validation: RSS during human crossing",
+      "description": "Person (0.4m×0.4m, θ*=0.7) crosses LOS at midpoint, plot RSS vs x-position",
+      "status": "not_started",
+      "verified": false,
+      "verification_criteria": "RSS dip when person crosses LOS, max attenuation at x=0",
+      "notes": ""
+    },
+    {
+      "id": "2.3",
+      "phase": 2,
+      "title": "Visualize weight matrix W",
+      "description": "Reshape weight vectors to 30×30 for representative links, verify elliptical shape",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "2.4",
+      "phase": 2,
+      "title": "Visualize Tikhonov reconstruction",
+      "description": "Apply Π·y for sample inputs, verify spatial prior quality",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "3.1",
+      "phase": 3,
+      "title": "Implement SLF target generation",
+      "description": "10 target types: person, table, chair, cabinet, wall, L/T-shaped, circular, multiple, empty",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "3.2",
+      "phase": 3,
+      "title": "Implement spatially correlated noise",
+      "description": "Gaussian noise with covariance C_θ(k,l) = σ_θ² · exp(-D_kl/κ)",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "3.3",
+      "phase": 3,
+      "title": "Implement full data pipeline",
+      "description": "Generate 60,000 samples (48k/6k/6k split), save as dataset",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "3.4",
+      "phase": 3,
+      "title": "Verify data quality",
+      "description": "Visualize sample SLFs, RSS distributions, check for anomalies",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "4.1",
+      "phase": 4,
+      "title": "Implement Tikhonov branch",
+      "description": "Fixed Π·y, registered as buffer, no learnable params",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "4.2",
+      "phase": 4,
+      "title": "Implement FC branch",
+      "description": "FC(16→900), init W_fc=Π, linear (no activation)",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "4.3",
+      "phase": 4,
+      "title": "Implement U-Net",
+      "description": "2-level encoder, bottleneck, decoder with skip connections. Handle 30→15→7 size mismatch",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "4.4",
+      "phase": 4,
+      "title": "Implement Dual-Branch U-Net (proposed)",
+      "description": "Concat Tikhonov + FC → 2ch → U-Net → 1ch output",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "4.5",
+      "phase": 4,
+      "title": "Implement ablation models",
+      "description": "Tikhonov-Only + U-Net (1ch input), FC-Only + U-Net (1ch input)",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "4.6",
+      "phase": 4,
+      "title": "Verify model architectures",
+      "description": "Forward pass with dummy data, check output shapes, param counts (~1.55M for U-Net)",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "5.1",
+      "phase": 5,
+      "title": "Implement training loop",
+      "description": "MSE + λ·(1-SSIM) loss, Adam, ReduceLROnPlateau, early stopping",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "5.2",
+      "phase": 5,
+      "title": "Train proposed model",
+      "description": "End-to-end: Π frozen, FC + U-Net trained. Log to experiments/",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "5.3",
+      "phase": 5,
+      "title": "Train Tikhonov-Only ablation",
+      "description": "Same config, same data split. Π frozen, U-Net only trained",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "5.4",
+      "phase": 5,
+      "title": "Train FC-Only ablation",
+      "description": "Same config, same data split. FC + U-Net trained",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "6.1",
+      "phase": 6,
+      "title": "Evaluate all models on test set",
+      "description": "Compute MSE, PSNR, SSIM, RMSE for all 3 models on same test set",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "6.2",
+      "phase": 6,
+      "title": "Cross-model comparison",
+      "description": "Quantitative table + statistical analysis of component contributions",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "7.1",
+      "phase": 7,
+      "title": "Training curves",
+      "description": "Loss vs epoch for all 3 models",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "7.2",
+      "phase": 7,
+      "title": "Reconstruction comparison grid",
+      "description": "Ground truth, Tikhonov-Only, FC-Only, Proposed side-by-side",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    },
+    {
+      "id": "7.3",
+      "phase": 7,
+      "title": "Error maps and branch analysis",
+      "description": "|predicted - ground truth| for each method + Branch A/B intermediate outputs",
+      "status": "not_started",
+      "verified": false,
+      "notes": ""
+    }
+  ]
+}
