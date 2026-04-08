@@ -74,9 +74,12 @@ def evaluate_all(data_dir: str = "data", ckpt_dir: str = "checkpoints") -> dict:
     """Evaluate all 3 models and produce comparison table."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Load test data
+    # Load test data with normalization
     data = np.load(f"{data_dir}/test.npz")
-    rss = torch.from_numpy(data["rss"])
+    norm = np.load(f"{data_dir}/norm_stats.npz")
+    rss_raw = data["rss"]
+    rss_norm = (rss_raw - norm["rss_mean"]) / norm["rss_std"]
+    rss = torch.from_numpy(rss_norm.astype(np.float32))
     theta = torch.from_numpy(data["theta_star"]).view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
     test_loader = DataLoader(TensorDataset(rss, theta), batch_size=BATCH_SIZE,
                              num_workers=2, pin_memory=True)

@@ -31,12 +31,17 @@ from uwb_rti.models.fc_only import FCOnlyUNet
 # =============================================================================
 
 class CombinedLoss(nn.Module):
-    """MSE + lambda * (1 - SSIM) loss for SLF reconstruction."""
+    """Weighted MSE + lambda * (1 - SSIM) loss for SLF reconstruction.
 
-    def __init__(self, ssim_lambda: float = LOSS_SSIM_LAMBDA) -> None:
+    Uses pixel-weighting to combat class imbalance (97.6% zero pixels).
+    Nonzero target pixels are weighted higher to prevent trivial all-zeros solution.
+    """
+
+    def __init__(self, ssim_lambda: float = LOSS_SSIM_LAMBDA,
+                 object_weight: float = 20.0) -> None:
         super().__init__()
         self.ssim_lambda = ssim_lambda
-        self.mse = nn.MSELoss()
+        self.object_weight = object_weight
 
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
@@ -44,31 +49,43 @@ class CombinedLoss(nn.Module):
             pred: Predicted SLF, shape (B, 1, 30, 30).
             target: Ground truth SLF, shape (B, 1, 30, 30).
         """
-        mse_loss = self.mse(pred, target)
+        # Pixel-weighted MSE: upweight nonzero (object) pixels
+        weight = torch.where(target > 0, self.object_weight, 1.0)
+        weighted_mse = (weight * (pred - target) ** 2).mean()
         # SSIM: window_size=7 for 30x30 images (must be odd, <= image size)
         ssim_val = ssim(pred, target, data_range=1.0, size_average=True, win_size=7)
-        return mse_loss + self.ssim_lambda * (1.0 - ssim_val)
+        return weighted_mse + self.ssim_lambda * (1.0 - ssim_val)
 
 
 # =============================================================================
 # Data loading
 # =============================================================================
 
-def load_data(data_dir: str = "data") -> tuple[DataLoader, DataLoader, DataLoader]:
-    """Load train/val/test datasets as DataLoaders."""
+def load_data(data_dir: str = "data") -> tuple[DataLoader, DataLoader, DataLoader, dict]:
+    """Load train/val/test datasets with z-score normalized RSS.
+
+    Returns:
+        train_loader, val_loader, test_loader, norm_stats.
+    """
+    # Compute normalization stats from training set
+    train_data = np.load(f"{data_dir}/train.npz")
+    rss_mean = train_data["rss"].mean(axis=0)  # (16,) per-link
+    rss_std = train_data["rss"].std(axis=0)    # (16,) per-link
+    norm_stats = {"rss_mean": rss_mean, "rss_std": rss_std}
+
     loaders = []
     for split in ["train", "val", "test"]:
         data = np.load(f"{data_dir}/{split}.npz")
-        rss = torch.from_numpy(data["rss"])          # (N, 16)
+        rss = (data["rss"] - rss_mean) / rss_std  # z-score normalize
+        rss = torch.from_numpy(rss.astype(np.float32))
         theta = torch.from_numpy(data["theta_star"])  # (N, 900)
-        # Reshape theta to image format
-        theta = theta.view(-1, 1, N_PIXELS_Y, N_PIXELS_X)  # (N, 1, 30, 30)
+        theta = theta.view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
         dataset = TensorDataset(rss, theta)
         shuffle = (split == "train")
         loaders.append(DataLoader(dataset, batch_size=BATCH_SIZE,
                                   shuffle=shuffle, num_workers=2,
                                   pin_memory=True))
-    return loaders[0], loaders[1], loaders[2]
+    return loaders[0], loaders[1], loaders[2], norm_stats
 
 
 # =============================================================================
@@ -219,10 +236,14 @@ def train_all(data_dir: str = "data") -> list[dict]:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
-    # Load data
-    train_loader, val_loader, test_loader = load_data(data_dir)
+    # Load data (with z-score normalization)
+    train_loader, val_loader, test_loader, norm_stats = load_data(data_dir)
     print(f"Data: {len(train_loader.dataset)} train, "
           f"{len(val_loader.dataset)} val, {len(test_loader.dataset)} test")
+    print(f"RSS normalized: mean subtracted, std divided (per-link)")
+
+    # Save normalization stats for inference
+    np.savez(f"{data_dir}/norm_stats.npz", **norm_stats)
 
     # Load Pi
     fm = np.load(f"{data_dir}/forward_model.npz")
