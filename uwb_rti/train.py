@@ -164,8 +164,9 @@ def train_model(
 
         scheduler.step(val_loss)
 
-        # Early stopping
-        if val_loss < best_val_loss:
+        # Early stopping (with min_delta to avoid float-tie stalling)
+        min_delta = 1e-6
+        if val_loss < best_val_loss - min_delta:
             best_val_loss = val_loss
             patience_counter = 0
             torch.save(model.state_dict(), ckpt_dir / f"{model_name}_best.pt")
