@@ -115,54 +115,54 @@
       "phase": 4,
       "title": "Implement Tikhonov branch",
       "description": "Fixed Π·y, registered as buffer, no learnable params",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Pi as register_buffer, 0 trainable params confirmed"
     },
     {
       "id": "4.2",
       "phase": 4,
       "title": "Implement FC branch",
       "description": "FC(16→900), init W_fc=Π, linear (no activation)",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "15,300 params, FC init matches Pi (transfer learning)"
     },
     {
       "id": "4.3",
       "phase": 4,
       "title": "Implement U-Net",
       "description": "2-level encoder, bottleneck, decoder with skip connections. Handle 30→15→7 size mismatch",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Pad 30->32 with reflect, ConvTranspose2d for upsampling, crop back to 30. ~1.86M params"
     },
     {
       "id": "4.4",
       "phase": 4,
       "title": "Implement Dual-Branch U-Net (proposed)",
       "description": "Concat Tikhonov + FC → 2ch → U-Net → 1ch output",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "1,880,133 trainable params total, output (B,1,30,30) verified"
     },
     {
       "id": "4.5",
       "phase": 4,
       "title": "Implement ablation models",
       "description": "Tikhonov-Only + U-Net (1ch input), FC-Only + U-Net (1ch input)",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Both use same UNet class with in_channels=1. TikOnly: 1.86M, FCOnly: 1.88M"
     },
     {
       "id": "4.6",
       "phase": 4,
       "title": "Verify model architectures",
       "description": "Forward pass with dummy data, check output shapes, param counts (~1.55M for U-Net)",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "All 3 models pass forward with batch=4, correct shapes, Pi frozen, FC init=Pi"
     },
     {
       "id": "5.1",

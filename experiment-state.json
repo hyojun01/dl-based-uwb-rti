@@ -48,7 +48,7 @@
     },
     "4": {
       "name": "dl-components",
-      "status": "not_started",
+      "status": "complete",
       "modules": [
         "models/tikhonov_branch.py",
         "models/fc_branch.py",
