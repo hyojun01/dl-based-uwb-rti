@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 
 from uwb_rti.config import (
     TX_POSITIONS, RX_POSITIONS, PIXEL_CENTERS,
@@ -148,11 +149,15 @@ def validate_weight_matrix(W: np.ndarray, save: bool = True) -> None:
         "TX1-RX2 (off-center, d=3.2m)": 6,
     }
 
-    fig, axes = plt.subplots(1, 4, figsize=(18, 4))
+    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
     for ax, (label, link_idx) in zip(axes, links.items()):
         w_img = W[link_idx].reshape(N_PIXELS_Y, N_PIXELS_X)
-        im = ax.imshow(w_img, origin="lower", extent=[0, AREA_WIDTH, 0, AREA_HEIGHT],
-                        cmap="hot", aspect="equal")
+        # Use log scale to reveal Fresnel zone structure (40:1 dynamic range)
+        w_plot = np.where(w_img > 0, w_img, np.nan)
+        vmin = np.nanmin(w_plot) if np.any(~np.isnan(w_plot)) else 1e-4
+        im = ax.imshow(w_plot, origin="lower", extent=[0, AREA_WIDTH, 0, AREA_HEIGHT],
+                        cmap="hot", aspect="equal", interpolation="nearest",
+                        norm=LogNorm(vmin=vmin, vmax=np.nanmax(w_plot)))
         # Mark TX and RX
         i, j = link_idx // N_RX, link_idx % N_RX
         ax.plot(*TX_POSITIONS[i], "bv", markersize=10, label="TX")
@@ -160,10 +165,10 @@ def validate_weight_matrix(W: np.ndarray, save: bool = True) -> None:
         ax.set_title(label, fontsize=9)
         ax.set_xlabel("x [m]")
         ax.set_ylabel("y [m]")
-        plt.colorbar(im, ax=ax, fraction=0.046)
+        plt.colorbar(im, ax=ax, fraction=0.046, label="weight (log)")
 
     axes[0].legend(loc="upper right", fontsize=7)
-    fig.suptitle("Validation 3: Weight Matrix W — Elliptical Patterns", y=1.02)
+    fig.suptitle("Validation 3: Weight Matrix W — Fresnel Zone Ellipses (log scale)", y=1.02)
     fig.tight_layout()
 
     if save:
