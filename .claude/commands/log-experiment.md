@@ -12,7 +12,9 @@ Save a complete experiment record.
 
 1. Read current `experiment-state.json` for active hyperparameters
 2. Collect: model name, epoch count, final train/val loss, test metrics (if available), training time
-3. Create `experiments/exp_{NNN}.json` with the next sequential number
+3. Generate a collision-resistant experiment ID: `exp_{YYYYMMDD}T{HHMMSS}_{6-char-hex}` (e.g. `exp_20260408T143022_a3f1b2`)
+   - The 6-char hex suffix is derived from `uuidgen | head -c 6` or `python3 -c "import uuid; print(uuid.uuid4().hex[:6])"`
+   - Create `experiments/{id}.json` atomically — if the file already exists, regenerate the suffix and retry
 4. Update `experiment-state.json` with the latest results
 5. Print summary of what was logged
 
@@ -20,7 +22,7 @@ Save a complete experiment record.
 
 ```json
 {
-  "id": "exp_001",
+  "id": "exp_20260408T143022_a3f1b2",
   "timestamp": "ISO-8601",
   "model": "proposed | tikhonov_only | fc_only",
   "hyperparameters": { "...all active params..." },

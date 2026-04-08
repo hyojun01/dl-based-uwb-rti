@@ -6,7 +6,7 @@
       "Edit",
       "Bash(python3 *)",
       "Bash(python *)",
-      "Bash(pip install *)",
+      "Bash(pip install -r *)",
       "Bash(ls *)",
       "Bash(cat *)",
       "Bash(mkdir *)",
@@ -35,7 +35,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "input=$(cat); file=$(echo \"$input\" | jq -r '.tool_input.file_path // empty'); if [ \"$file\" = 'experiment-state.json' ] || [ \"$file\" = 'progress.json' ]; then ts=$(date -Iseconds); backup=\"logs/state-backup-${ts}.json\"; cp \"$file\" \"$backup\" 2>/dev/null; fi; exit 0"
+            "command": "input=$(cat); file=$(echo \"$input\" | jq -r '.tool_input.file_path // empty'); if [ \"$file\" = 'experiment-state.json' ] || [ \"$file\" = 'progress.json' ]; then if [ -f \"$file\" ]; then mkdir -p logs; ts=$(date -Iseconds); backup=\"logs/state-backup-${ts}.json\"; if ! cp \"$file\" \"$backup\"; then echo \"WARNING: State backup failed for $file -> $backup\" >&2; fi; fi; fi; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); file=$(echo \"$input\" | jq -r '.tool_input.file_path // empty'); if [ \"$file\" = 'experiment-state.json' ] || [ \"$file\" = 'progress.json' ]; then if [ -f \"$file\" ]; then mkdir -p logs; ts=$(date -Iseconds); backup=\"logs/state-backup-${ts}.json\"; if ! cp \"$file\" \"$backup\"; then echo \"WARNING: State backup failed for $file -> $backup\" >&2; fi; fi; fi; exit 0"
           }
         ]
       }
@@ -46,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "input=$(cat); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'python3?.*train\\.py'; then echo '{\"event\": \"training_run\", \"command\": \"'\"$cmd\"'\", \"timestamp\": \"'$(date -Iseconds)'\"}' >> logs/training-runs.jsonl; fi; exit 0"
+            "command": "input=$(cat); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'python3?.*train\\.py'; then mkdir -p logs; entry=$(printf '{\"event\":\"training_run\",\"command\":\"%s\",\"timestamp\":\"%s\"}' \"$cmd\" \"$(date -Iseconds)\"); if ! echo \"$entry\" >> logs/training-runs.jsonl; then echo \"WARNING: Failed to log training run to logs/training-runs.jsonl\" >&2; fi; fi; exit 0"
           }
         ]
       }
