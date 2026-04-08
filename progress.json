@@ -41,38 +41,38 @@
       "phase": 2,
       "title": "Validation: RSS vs Distance (no shadowing)",
       "description": "1 TX, 1 RX, vary D from 0.5m to 5m, plot theoretical RSS curve",
-      "status": "not_started",
-      "verified": false,
+      "status": "complete",
+      "verified": true,
       "verification_criteria": "RSS decreases logarithmically with distance",
-      "notes": ""
+      "notes": "RSS 100.7dB@0.5m → 81.7dB@5m, monotonically decreasing. Plot: val1_rss_vs_distance.png"
     },
     {
       "id": "2.2",
       "phase": 2,
       "title": "Validation: RSS during human crossing",
       "description": "Person (0.4m×0.4m, θ*=0.7) crosses LOS at midpoint, plot RSS vs x-position",
-      "status": "not_started",
-      "verified": false,
+      "status": "complete",
+      "verified": true,
       "verification_criteria": "RSS dip when person crosses LOS, max attenuation at x=0",
-      "notes": ""
+      "notes": "Max dip 0.32dB at x=-0.05m (near LOS). Plot: val2_human_crossing.png"
     },
     {
       "id": "2.3",
       "phase": 2,
       "title": "Visualize weight matrix W",
       "description": "Reshape weight vectors to 30×30 for representative links, verify elliptical shape",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "4 links visualized: edge, center, diagonal, off-center. Elliptical LOS patterns confirmed. Plot: val3_weight_matrix.png"
     },
     {
       "id": "2.4",
       "phase": 2,
       "title": "Visualize Tikhonov reconstruction",
       "description": "Apply Π·y for sample inputs, verify spatial prior quality",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "3 targets tested (person, two objects, wall). Blurry but spatially correct. Plot: val4_tikhonov_reconstruction.png"
     },
     {
       "id": "3.1",

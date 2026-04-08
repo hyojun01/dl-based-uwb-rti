@@ -18,12 +18,17 @@
     },
     "2": {
       "name": "model-validation",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["validate_model.py"],
-      "results": {},
+      "results": {
+        "val1_monotonic": true,
+        "val2_dip_near_los": true,
+        "val3_elliptical_patterns": true,
+        "val4_spatial_prior": true
+      },
       "validations": {
-        "rss_vs_distance": null,
-        "rss_human_crossing": null
+        "rss_vs_distance": "pass",
+        "rss_human_crossing": "pass"
       }
     },
     "3": {
