@@ -94,6 +94,12 @@
     "scheduler_patience": 10,
     "scheduler_factor": 0.5
   },
-  "decisions_log": [],
-  "last_updated": "2026-04-08T00:00:00Z"
+  "decisions_log": [
+    {
+      "date": "2026-04-08",
+      "finding": "All 3 models converge to trivial solution (predict zeros). MSE = MSE(all_zeros). Root causes: (1) 97.6% zero pixels dominate MSE, (2) shadowing = 4.8% of RSS variance, (3) branch outputs 163x larger than targets.",
+      "action": "Apply z-score RSS normalization + pixel-weighted MSE loss. Retrain all 3 models."
+    }
+  ],
+  "last_updated": "2026-04-08T12:00:00Z"
 }
