@@ -153,11 +153,14 @@ def validate_weight_matrix(W: np.ndarray, save: bool = True) -> None:
     for ax, (label, link_idx) in zip(axes, links.items()):
         w_img = W[link_idx].reshape(N_PIXELS_Y, N_PIXELS_X)
         # Use log scale to reveal Fresnel zone structure (40:1 dynamic range)
-        w_plot = np.where(w_img > 0, w_img, np.nan)
-        vmin = np.nanmin(w_plot) if np.any(~np.isnan(w_plot)) else 1e-4
-        im = ax.imshow(w_plot, origin="lower", extent=[0, AREA_WIDTH, 0, AREA_HEIGHT],
-                        cmap="hot", aspect="equal", interpolation="nearest",
-                        norm=LogNorm(vmin=vmin, vmax=np.nanmax(w_plot)))
+        # Mask zero-weight pixels so they render as distinct background
+        w_masked = np.ma.masked_where(w_img <= 0, w_img)
+        cmap = plt.cm.hot.copy()
+        cmap.set_bad(color="midnightblue")
+        vmin = w_masked.min()
+        im = ax.imshow(w_masked, origin="lower", extent=[0, AREA_WIDTH, 0, AREA_HEIGHT],
+                        cmap=cmap, aspect="equal", interpolation="nearest",
+                        norm=LogNorm(vmin=vmin, vmax=w_masked.max()))
         # Mark TX and RX
         i, j = link_idx // N_RX, link_idx % N_RX
         ax.plot(*TX_POSITIONS[i], "bv", markersize=10, label="TX")
