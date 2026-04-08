@@ -33,13 +33,17 @@
     },
     "3": {
       "name": "data-generation",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["data_generator.py"],
-      "results": {},
+      "results": {
+        "rss_mean_dB": 84.7,
+        "rss_std_dB": 3.7,
+        "type_balance": "uniform_~6k_each"
+      },
       "dataset": {
-        "total_samples": null,
-        "split": { "train": null, "val": null, "test": null },
-        "generation_time_sec": null
+        "total_samples": 60000,
+        "split": { "train": 48000, "val": 6000, "test": 6000 },
+        "generation_time_sec": 87.2
       }
     },
     "4": {

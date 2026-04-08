@@ -79,36 +79,36 @@
       "phase": 3,
       "title": "Implement SLF target generation",
       "description": "10 target types: person, table, chair, cabinet, wall, L/T-shaped, circular, multiple, empty",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "All 10 types verified: pixel counts range 0 (empty) to 56 (table), attenuation values match specs"
     },
     {
       "id": "3.2",
       "phase": 3,
       "title": "Implement spatially correlated noise",
       "description": "Gaussian noise with covariance C_θ(k,l) = σ_θ² · exp(-D_kl/κ)",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Cholesky factorization of covariance skeleton, sigma_theta sampled per sample U(0.01,0.05)"
     },
     {
       "id": "3.3",
       "phase": 3,
       "title": "Implement full data pipeline",
       "description": "Generate 60,000 samples (48k/6k/6k split), save as dataset",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "60k samples in 87s. Balanced types (~6k each). RSS mean=84.7dB, std=3.7dB. Saved as train/val/test.npz"
     },
     {
       "id": "3.4",
       "phase": 3,
       "title": "Verify data quality",
       "description": "Visualize sample SLFs, RSS distributions, check for anomalies",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Type balance verified (~6k each), RSS range 73-96dB, no anomalies, 2.4% nonzero SLF pixels"
     },
     {
       "id": "4.1",

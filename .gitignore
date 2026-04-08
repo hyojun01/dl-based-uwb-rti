@@ -1,0 +1,9 @@
+# Data files (too large for git)
+data/*.npz
+
+# Python
+__pycache__/
+*.pyc
+
+# Checkpoints
+checkpoints/
