@@ -169,81 +169,81 @@
       "phase": 5,
       "title": "Implement training loop",
       "description": "MSE + λ·(1-SSIM) loss, Adam, ReduceLROnPlateau, early stopping",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Weighted MSE (object_weight=20) + SSIM. Z-score RSS normalization. Early stopping min_delta=1e-6. Flush=True for print."
     },
     {
       "id": "5.2",
       "phase": 5,
       "title": "Train proposed model",
       "description": "End-to-end: Π frozen, FC + U-Net trained. Log to experiments/",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "exp_004: val=0.171983 @ ep 22, 42 epochs, 893s. Retrained with z-score RSS + weighted loss."
     },
     {
       "id": "5.3",
       "phase": 5,
       "title": "Train Tikhonov-Only ablation",
       "description": "Same config, same data split. Π frozen, U-Net only trained",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "exp_005: val=0.171734 @ ep 23, 43 epochs, 910s."
     },
     {
       "id": "5.4",
       "phase": 5,
       "title": "Train FC-Only ablation",
       "description": "Same config, same data split. FC + U-Net trained",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "exp_006: val=0.172555 @ ep 24, 44 epochs, 930s."
     },
     {
       "id": "6.1",
       "phase": 6,
       "title": "Evaluate all models on test set",
       "description": "Compute MSE, PSNR, SSIM, RMSE for all 3 models on same test set",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Proposed MSE=0.0178 PSNR=21.1 SSIM=0.623; TikOnly MSE=0.0183 PSNR=21.1 SSIM=0.620; FCOnly MSE=0.0207 PSNR=19.6 SSIM=0.571"
     },
     {
       "id": "6.2",
       "phase": 6,
       "title": "Cross-model comparison",
       "description": "Quantitative table + statistical analysis of component contributions",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Proposed best overall. FC branch adds ~3% MSE improvement over TikOnly. Tikhonov prior critical (FCOnly 16% worse). See trivial_solution_analysis.md."
     },
     {
       "id": "7.1",
       "phase": 7,
       "title": "Training curves",
       "description": "Loss vs epoch for all 3 models",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Plot: training_curves.png. All models early-stop ~42 epochs."
     },
     {
       "id": "7.2",
       "phase": 7,
       "title": "Reconstruction comparison grid",
       "description": "Ground truth, Tikhonov-Only, FC-Only, Proposed side-by-side",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Plot: reconstruction_grid.png. Models produce meaningful spatial reconstructions after fix."
     },
     {
       "id": "7.3",
       "phase": 7,
       "title": "Error maps and branch analysis",
       "description": "|predicted - ground truth| for each method + Branch A/B intermediate outputs",
-      "status": "not_started",
-      "verified": false,
-      "notes": ""
+      "status": "complete",
+      "verified": true,
+      "notes": "Plots: error_maps.png, branch_analysis.png. Branch A provides physics prior, Branch B learns complementary mapping."
     }
   ]
 }

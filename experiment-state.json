@@ -1,8 +1,8 @@
 {
   "project": "uwb-rti",
-  "current_phase": 1,
-  "phase_name": "forward-model",
-  "status": "in_progress",
+  "current_phase": 7,
+  "phase_name": "visualization",
+  "status": "complete",
   "phases": {
     "1": {
       "name": "forward-model",
@@ -61,27 +61,36 @@
     },
     "5": {
       "name": "training",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["train.py"],
-      "results": {},
-      "training_runs": []
+      "results": {
+        "fix_applied": "z-score RSS normalization + weighted MSE (object_weight=20)",
+        "early_stopping_fix": "min_delta=1e-6"
+      },
+      "training_runs": ["exp_004", "exp_005", "exp_006"]
     },
     "6": {
       "name": "evaluation",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["evaluate.py"],
-      "results": {},
+      "results": {
+        "proposed_best": true,
+        "fc_branch_contribution": "~3% MSE improvement over TikOnly",
+        "tikhonov_prior_critical": "FCOnly 16% worse MSE than Proposed"
+      },
       "metrics": {
-        "proposed": { "mse": null, "psnr": null, "ssim": null, "rmse": null },
-        "tikhonov_only": { "mse": null, "psnr": null, "ssim": null, "rmse": null },
-        "fc_only": { "mse": null, "psnr": null, "ssim": null, "rmse": null }
+        "proposed": { "mse": 0.0178, "psnr": 21.1, "ssim": 0.623, "rmse": 0.133 },
+        "tikhonov_only": { "mse": 0.0183, "psnr": 21.1, "ssim": 0.620, "rmse": 0.135 },
+        "fc_only": { "mse": 0.0207, "psnr": 19.6, "ssim": 0.571, "rmse": 0.144 }
       }
     },
     "7": {
       "name": "visualization",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["visualize.py"],
-      "results": {}
+      "results": {
+        "figures": ["training_curves.png", "reconstruction_grid.png", "error_maps.png", "branch_analysis.png"]
+      }
     }
   },
   "active_hyperparameters": {
@@ -101,5 +110,5 @@
       "action": "Apply z-score RSS normalization + pixel-weighted MSE loss. Retrain all 3 models."
     }
   ],
-  "last_updated": "2026-04-08T12:00:00Z"
+  "last_updated": "2026-04-09T00:00:00Z"
 }
