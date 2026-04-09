@@ -151,72 +151,72 @@
       "phase": 5,
       "title": "Implement training loop",
       "description": "Weighted MSE + lambda*(1-SSIM) loss, Adam, ReduceLROnPlateau, early stopping",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "5.2",
       "phase": 5,
       "title": "Train proposed model",
       "description": "End-to-end: Pi frozen, FC + U-Net trained. Log to experiments/",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "5.3",
       "phase": 5,
       "title": "Train Tikhonov-Only ablation",
       "description": "Same config, same data split. Pi frozen, U-Net only trained",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "5.4",
       "phase": 5,
       "title": "Train FC-Only ablation",
       "description": "Same config, same data split. FC + U-Net trained",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "6.1",
       "phase": 6,
       "title": "Evaluate all models on test set",
       "description": "Compute MSE, PSNR, SSIM, RMSE for all 3 models on same test set",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "6.2",
       "phase": 6,
       "title": "Cross-model comparison",
       "description": "Quantitative table + statistical analysis of component contributions",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "7.1",
       "phase": 7,
       "title": "Training curves",
       "description": "Loss vs epoch for all 3 models",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "7.2",
       "phase": 7,
       "title": "Reconstruction comparison grid",
       "description": "Ground truth, Tikhonov-Only, FC-Only, Proposed side-by-side",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "7.3",
       "phase": 7,
       "title": "Error maps and branch analysis",
       "description": "|predicted - ground truth| for each method + Branch A/B intermediate outputs",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     }
   ]
 }

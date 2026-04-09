@@ -1,8 +1,8 @@
 {
   "project": "uwb-rti",
-  "current_phase": 5,
-  "phase_name": "training",
-  "status": "in_progress",
+  "current_phase": 7,
+  "phase_name": "visualization",
+  "status": "complete",
   "phases": {
     "1": {
       "name": "forward-model",
@@ -62,21 +62,32 @@
     },
     "5": {
       "name": "training",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["train.py"],
-      "results": {}
+      "results": {
+        "proposed": {"best_val_loss": 0.136589, "best_epoch": 9, "total_epochs": 29},
+        "tikhonov_only": {"best_val_loss": 0.136657, "best_epoch": 22, "total_epochs": 42},
+        "fc_only": {"best_val_loss": 0.136014, "best_epoch": 20, "total_epochs": 40}
+      }
     },
     "6": {
       "name": "evaluation",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["evaluate.py"],
-      "results": {}
+      "results": {
+        "proposed": {"mse": 0.023087, "psnr": 18.26, "ssim": 0.5501, "rmse": 0.151943},
+        "tikhonov_only": {"mse": 0.019005, "psnr": 19.99, "ssim": 0.6187, "rmse": 0.137859},
+        "fc_only": {"mse": 0.019350, "psnr": 19.51, "ssim": 0.6069, "rmse": 0.139104},
+        "note": "Proposed underperforms ablations — needs investigation"
+      }
     },
     "7": {
       "name": "visualization",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["visualize.py"],
-      "results": {}
+      "results": {
+        "figures_generated": ["training_curves", "reconstruction_grid", "error_maps", "branch_analysis"]
+      }
     }
   },
   "active_hyperparameters": {
@@ -90,5 +101,5 @@
     "scheduler_factor": 0.5
   },
   "decisions_log": [],
-  "last_updated": "2026-04-09T12:04:00Z"
+  "last_updated": "2026-04-09T12:30:00Z"
 }
