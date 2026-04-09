@@ -71,32 +71,32 @@
       "phase": 3,
       "title": "Implement SLF change target generation",
       "description": "10 target types: person, table, chair, cabinet, wall, L/T-shaped, circular, multiple, empty",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "3.2",
       "phase": 3,
       "title": "Implement spatially correlated noise",
       "description": "Gaussian noise with covariance Sigma_f(k,l) = sigma_f^2 * exp(-D_kl/kappa)",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "3.3",
       "phase": 3,
       "title": "Implement full data pipeline",
       "description": "Generate 60,000 samples (48k/6k/6k split), save as dataset with delta_r and delta_f_star keys",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "3.4",
       "phase": 3,
       "title": "Verify data quality",
       "description": "Visualize sample SLFs, RSS difference distributions, check for anomalies",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "4.1",

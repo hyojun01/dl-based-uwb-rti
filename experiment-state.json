@@ -1,7 +1,7 @@
 {
   "project": "uwb-rti",
-  "current_phase": 3,
-  "phase_name": "data-generation",
+  "current_phase": 4,
+  "phase_name": "dl-components",
   "status": "in_progress",
   "phases": {
     "1": {
@@ -30,9 +30,16 @@
     },
     "3": {
       "name": "data-generation",
-      "status": "not_started",
+      "status": "complete",
       "modules": ["data_generator.py"],
-      "results": {}
+      "results": {
+        "n_samples": 60000,
+        "generation_time_sec": 86.0,
+        "split": {"train": 48000, "val": 6000, "test": 6000},
+        "delta_r_mean": 0.311,
+        "delta_r_std": 2.011,
+        "types_balanced": true
+      }
     },
     "4": {
       "name": "dl-components",
@@ -77,5 +84,5 @@
     "scheduler_factor": 0.5
   },
   "decisions_log": [],
-  "last_updated": "2026-04-09T12:02:00Z"
+  "last_updated": "2026-04-09T12:03:00Z"
 }
