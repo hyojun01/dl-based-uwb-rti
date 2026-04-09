@@ -2,15 +2,15 @@
 
 ### 4.1 Dual-Branch Physics-Informed U-Net (Proposed Model)
 
-Input: 16-dimensional RSS vector y
-Output: 30×30×1 SLF image θ_hat
+Input: 16-dimensional RSS difference vector ΔR
+Output: 30×30×1 SLF change image Δf_hat
 
 Overall architecture:
 ```
-y ∈ R^16
-  ├── Branch A (Tikhonov): Π · y → reshape(1×30×30)     [fixed, no learnable params]
-  ├── Branch B (FC):       FC(y) → reshape(1×30×30)     [learnable]
-  └── Concat → (2×30×30) → U-Net → θ_hat (1×30×30)
+ΔR ∈ R^16
+  ├── Branch A (Tikhonov): Π · ΔR → reshape(1×30×30)    [fixed, no learnable params]
+  ├── Branch B (FC):       FC(ΔR) → reshape(1×30×30)    [learnable]
+  └── Concat → (2×30×30) → U-Net → Δf_hat (1×30×30)
 ```
 
 #### 4.1.1 Branch A: Tikhonov Reconstruction (Fixed)
@@ -25,7 +25,7 @@ Pi_tensor = torch.from_numpy(Pi).float()          # Transfer to GPU and freeze
 
 Forward pass:
 ```
-θ_tik = Π · y ∈ R^900 → reshape → (1×30×30)
+Δf_tik = Π · ΔR ∈ R^900 → reshape → (1×30×30)
 ```
 
 Parameters: None (registered as buffer)
@@ -102,8 +102,8 @@ Ablation model using only Branch A to verify the contribution of the FC branch i
 
 Architecture:
 ```
-y ∈ R^16
-  └── Π · y → reshape(1×30×30) → U-Net → θ_hat (1×30×30)
+ΔR ∈ R^16
+  └── Π · ΔR → reshape(1×30×30) → U-Net → Δf_hat (1×30×30)
 ```
 
 U-Net architecture is identical to Section 4.1.3 except the input channel is changed to 1:
@@ -119,8 +119,8 @@ Reference: Oral et al. (2023), DeepFC.
 
 Architecture:
 ```
-y ∈ R^16
-  └── FC(900) → reshape(1×30×30) → U-Net → θ_hat (1×30×30)
+ΔR ∈ R^16
+  └── FC(900) → reshape(1×30×30) → U-Net → Δf_hat (1×30×30)
 ```
 
 U-Net architecture is identical to Section 4.1.3 except the input channel is changed to 1.
@@ -164,7 +164,7 @@ All models are trained end-to-end using the **same** data split.
 
 | Metric | Definition | Purpose |
 |---|---|---|
-| MSE | (1/K) · \|\|θ_hat - θ*\|\|² | Per-pixel reconstruction error |
+| MSE | (1/K) · \|\|Δf_hat - Δf*_A\|\|² | Per-pixel reconstruction error |
 | PSNR | 10 · log10(max² / MSE) | Signal-to-noise ratio |
 | SSIM | Structural Similarity Index | Structural similarity |
 | RMSE | sqrt(MSE) | Error in original scale |

@@ -3,10 +3,10 @@
 ```
 uwb_rti/
 ├── config.py                  # All constants and parameters
-├── forward_model.py           # Weight matrix, RSS generation, Tikhonov matrix (Π) computation
+├── forward_model.py           # Weight matrix, RSS difference generation, Tikhonov matrix (Π) computation
 ├── data_generator.py          # Training data generation
 ├── models/
-│   ├── tikhonov_branch.py     # Fixed Tikhonov reconstruction branch (Π · y)
+│   ├── tikhonov_branch.py     # Fixed Tikhonov reconstruction branch (Π · ΔR)
 │   ├── fc_branch.py           # Learnable FC branch
 │   ├── unet.py                # U-Net refinement network
 │   ├── dual_branch_unet.py    # Proposed model (Tikhonov + FC → U-Net)

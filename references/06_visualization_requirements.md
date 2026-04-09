@@ -1,7 +1,7 @@
 ## 6. Visualization Requirements
 
 1. **Weight matrix visualization**: Show weight vector reshaped to 30×30 for a few representative links
-2. **Tikhonov reconstruction visualization**: Show Π · y reshaped to 30×30 for sample inputs to verify spatial prior quality
+2. **Tikhonov reconstruction visualization**: Show Π · ΔR reshaped to 30×30 for sample inputs to verify spatial prior quality
 3. **Model validation plots**: RSS vs distance, RSS vs person position
 4. **Training curves**: loss vs epoch for all models (proposed, Tikhonov-Only, FC-Only)
 5. **Reconstruction comparison**: grid showing ground truth, Tikhonov-Only output, FC-Only output, proposed model output

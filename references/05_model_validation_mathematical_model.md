@@ -1,33 +1,23 @@
 ## 5. Model Validation (Mathematical Model)
 
-### 5.1 Validation 1: RSS vs Distance (No Shadowing)
+### 5.1 Validation 1: RSS Difference vs Object Attenuation
 
-Setup: 1 TX, 1 RX. No objects (s = 0). Vary distance D from 0.5m to 5m.
+Setup: 1 TX at (0, 0), 1 RX at (0, 3). Place a single object (0.4m × 0.4m) at the midpoint (0, 1.5) directly on the LOS path. Vary object attenuation Δf*_{A,k} from 0.1 to 1.0.
 
-Theoretical RSS:
-```
-y = b - α * 20 * log10(D)
-```
+For each attenuation value:
+1. Construct Δf*_A with the object at fixed position
+2. Compute Δr = c · w^T · Δf*_A (no noise)
 
-Use typical values: b = 95 dB, α = 0.95.
+Plot: Δr vs object attenuation. Expected: Δr increases linearly with attenuation, confirming the forward model's linearity.
 
-Plot: theoretical RSS vs distance curve. This validates the path loss model.
+### 5.2 Validation 2: RSS Difference During Human Crossing
 
-Expected behavior: RSS decreases logarithmically with distance.
-
-Real measurement reference: With DW3000 at CH9, the RSS (reported as CIR power or first path power) should follow a similar log-distance decay.
-
-### 5.2 Validation 2: RSS Change During Human Crossing
-
-Setup: 1 TX at (0, 0), 1 RX at (0, 3). Fixed distance D = 3m. A person crosses perpendicular to the TX-RX line at the midpoint.
-
-Model the person as a rectangular object (0.4m × 0.4m, θ* = 0.7) moving from x = -1m to x = 4m at y = 1.5m.
+Setup: 1 TX at (0, 0), 1 RX at (0, 3). A person (0.4m × 0.4m, Δf*_{A,k} = 0.7) moves perpendicular to the TX-RX line at y = 1.5m, from x = -1m to x = 4m.
 
 For each person position:
-1. Construct SLF image with person at current position
-2. Compute shadowing: s = c * w^T * θ
-3. Compute RSS: y = b - s - α * d
+1. Construct Δf*_A with person at current position
+2. Compute Δr = c · w^T · Δf*_A
 
-Plot: RSS vs person's x-position. Expected: RSS dip when person crosses the LOS path, with maximum attenuation at x = 0 (directly on LOS).
+Plot: Δr vs person's x-position. Expected: Δr peaks when person crosses the LOS path, with maximum at x = 0 (directly on LOS). The response decays as the person moves away from the link.
 
 ---

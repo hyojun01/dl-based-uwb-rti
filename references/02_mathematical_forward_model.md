@@ -1,55 +1,68 @@
 ## 2. Mathematical Forward Model
 
-### 2.1 RSS Measurement Model
+### 2.1 RSS Difference Model
 
-Reference: Wu et al. (2020), Eq. (1).
+Reference: Wu et al. (2024), Section 5.1.
 
-For transmitter at x' and receiver at x'':
+For transmitter at x' and receiver at x'', the RSS measurement is:
 
 ```
-y = b - s - α * d + ε
+r(x', x'') = g - γ · 10·log10(d(x', x'')) - s(x', x'')
 ```
 
 Where:
-- `y`: RSS measurement in dB
-- `b`: bias term (aggregates transmitter power, receiver sensitivity, antenna gains)
-- `s`: shadowing component (signal attenuation due to objects)
-- `α`: free space path loss exponent
-- `d = 20 * log10(D)`: log-distance, D is distance in meters between TX and RX
-- `ε`: additive measurement noise
+- `g`: gain term (aggregates transmitter power, receiver sensitivity, antenna gains)
+- `γ`: path loss exponent
+- `d(x', x'')`: distance between TX and RX
+- `s(x', x'')`: shadowing component (signal attenuation due to objects)
+
+**Baseline measurement** (vacant environment, no target objects):
+
+```
+r̄(x', x'') = g - γ · 10·log10(d(x', x'')) - s̄(x', x'')
+```
+
+Where `s̄ = c · w^T · f̄_A` is the shadowing from the static environment, and `f̄_A` is the baseline SLF.
+
+**RSS difference** (baseline minus current):
+
+```
+Δr(x', x'') = r̄ - r = s - s̄ = c · w^T · Δf_A
+```
+
+The gain `g`, path loss `γ · 10·log10(d)`, and static shadowing cancel out, leaving only the change in SLF.
 
 ### 2.2 Shadowing Component
 
 Reference: Wu et al. (2020), Eq. (2).
 
 ```
-s(θ, x', x'') = c * Σ_{k=1}^{K} w(x', x'', x_k) * θ_k = c * w^T * θ
+s(f_A, x', x'') = c * Σ_{k=1}^{K} w(x', x'', x_k) * f_{A,k} = c * w^T * f_A
 ```
 
 Where:
-- `θ ∈ R^K` (K=900): discrete SLF vector
+- `f_A ∈ R^K` (K=900): discrete Spatial Loss Field (SLF) vector
 - `w ∈ R^K`: weight vector for a given TX-RX pair
 - `x_k`: center position of pixel k
 - `c = 2`: scaling constant
 
 ### 2.3 Full Forward Model
 
-Reference: Wu et al. (2020), Eq. (5).
+Reference: Wu et al. (2024), Eq. (2).
 
-For all 16 links (N=16), each link has 1 measurement (static nodes, n=1):
+For all 16 links (N=16), the RSS difference vector is:
 
 ```
-y = Z*b - c*W*θ - α*d + ε
+ΔR = c · W · (Δf_A + f̃_A) + ε
 ```
 
 Where:
-- `y ∈ R^16`: full RSS measurement vector
-- `Z ∈ R^{16×16}`: identity matrix (since n=1, Z = I_16)
-- `b ∈ R^16`: bias vector for each link
+- `ΔR ∈ R^16`: RSS difference vector (baseline minus current)
 - `W ∈ R^{16×900}`: weight matrix (each row is the weight vector for one link)
-- `θ ∈ R^900`: SLF image vector
-- `d ∈ R^16`: log-distance vector
-- `ε ∈ R^16`: noise vector
+- `Δf_A ∈ R^900`: SLF change vector (the estimation target)
+- `f̃_A ∈ R^900`: zero-mean spatially correlated Gaussian noise field
+- `ε ∈ R^16`: additive i.i.d. Gaussian measurement noise
+- `c = 2`: scaling constant
 
 ### 2.4 Weight Model: Inverse Area Elliptical Model
 
@@ -99,30 +112,28 @@ with clamping at β_min and cutoff at β_max.
 
 ### 2.5 Parameter Ranges
 
-Reference: Wu et al. (2020), Section IV-A.
+Reference: Wu et al. (2024), Section 5.1.
 
 | Parameter | Distribution/Value |
 |---|---|
-| Bias b_i | U(90, 100) for each link |
-| Path loss exponent α | U(0.9, 1.0) |
-| Noise ε | N(0, σ_ε²·I), σ_ε ~ U(0.3, 3.0) |
-| SLF noise σ_θ | U(0.01, 0.05) |
+| Measurement noise ε | N(0, σ_ε²·I), σ_ε ~ U(0.3, 3.0) |
+| SLF noise variance σ_f | U(0.01, 0.05) |
 | SLF spatial correlation κ | 0.21 m |
 | Scaling constant c | 2 |
 
-### 2.6 SLF Image Definition
+### 2.6 SLF Change Definition
 
-Reference: Wu et al. (2020), Section IV-A.
+Reference: Wu et al. (2024), Section 5.1.
 
 ```
-θ = θ* + θ̃
+Δf_A = Δf*_A + f̃_A
 ```
 
-- `θ*`: ideal SLF image (ground truth)
-  - Free space: θ*_k = 0
-  - Object region: θ*_k ~ U(0.3, 1.0)
-- `θ̃`: zero-mean spatially correlated Gaussian noise
-  - Covariance: C_θ(k,l) = σ_θ² * exp(-D_kl / κ)
+- `Δf*_A`: ideal SLF change (ground truth)
+  - Free space: Δf*_{A,k} = 0 (no change from baseline)
+  - Object region: Δf*_{A,k} ~ U(0.3, 1.0)
+- `f̃_A`: zero-mean spatially correlated Gaussian noise
+  - Covariance: Σ_f(k,l) = σ_f² * exp(-D_kl / κ)
   - D_kl: distance between pixel k and pixel l centers
 
 ### 2.7 SLF Target Types (Indoor Environment)
