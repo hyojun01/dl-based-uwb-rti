@@ -100,6 +100,20 @@
     "scheduler_patience": 10,
     "scheduler_factor": 0.5
   },
-  "decisions_log": [],
-  "last_updated": "2026-04-09T12:30:00Z"
+  "decisions_log": [
+    {
+      "date": "2026-04-09",
+      "context": "Post-training analysis of all 3 models",
+      "findings": [
+        "All DL models have HIGHER total MSE than raw Tikhonov baseline (Pi@ΔR)",
+        "Signal is only 13% of total RSS variance; noise is 5x signal",
+        "Edge links (0,15) carry ZERO object signal due to margin/Fresnel geometry",
+        "Weight matrix imbalance: 21.7x ratio between diagonal and edge links",
+        "Weighted loss (20x object) trades bg accuracy for obj accuracy, hurting total MSE",
+        "Proposed model early-stops at ep9 due to branch redundancy at initialization"
+      ],
+      "status": "awaiting_human_decision"
+    }
+  ],
+  "last_updated": "2026-04-09T13:00:00Z"
 }
