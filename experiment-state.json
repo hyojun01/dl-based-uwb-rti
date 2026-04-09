@@ -1,7 +1,7 @@
 {
   "project": "uwb-rti",
-  "current_phase": 2,
-  "phase_name": "model-validation",
+  "current_phase": 3,
+  "phase_name": "data-generation",
   "status": "in_progress",
   "phases": {
     "1": {
@@ -18,9 +18,15 @@
     },
     "2": {
       "name": "model-validation",
-      "status": "in_progress",
+      "status": "complete",
       "modules": ["validate_model.py"],
-      "results": {}
+      "results": {
+        "val1_linearity_R": 1.0,
+        "val2_peak_x": -0.047,
+        "val2_peak_near_los": true,
+        "val3_elliptical_patterns": true,
+        "val4_tikhonov_localizes": true
+      }
     },
     "3": {
       "name": "data-generation",
@@ -71,5 +77,5 @@
     "scheduler_factor": 0.5
   },
   "decisions_log": [],
-  "last_updated": "2026-04-09T12:01:00Z"
+  "last_updated": "2026-04-09T12:02:00Z"
 }

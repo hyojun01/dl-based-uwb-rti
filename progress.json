@@ -37,8 +37,8 @@
       "phase": 2,
       "title": "Validation: RSS difference vs object attenuation",
       "description": "1 TX, 1 RX, object at midpoint, vary attenuation 0.1-1.0. Verify linear relationship.",
-      "status": "pending",
-      "verified": false,
+      "status": "complete",
+      "verified": true,
       "verification_criteria": "RSS difference increases linearly with attenuation (R > 0.999)"
     },
     {
@@ -46,8 +46,8 @@
       "phase": 2,
       "title": "Validation: RSS difference during human crossing",
       "description": "Person (0.4m x 0.4m, delta_f=0.7) crosses LOS at midpoint. Verify peak at LOS.",
-      "status": "pending",
-      "verified": false,
+      "status": "complete",
+      "verified": true,
       "verification_criteria": "RSS difference peaks when person crosses LOS, max near x=0"
     },
     {
@@ -55,16 +55,16 @@
       "phase": 2,
       "title": "Visualize weight matrix W",
       "description": "Reshape weight vectors to 30x30 for representative links, verify elliptical shape",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "2.4",
       "phase": 2,
       "title": "Visualize Tikhonov reconstruction",
       "description": "Apply Pi to synthetic RSS difference for sample inputs, verify spatial prior quality",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "3.1",
