@@ -87,10 +87,13 @@ def plot_reconstruction_grid(
     """Side-by-side comparison: GT, Tikhonov-Only, FC-Only, Proposed."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Load test data
+    # Load test data with z-score normalization
     data = np.load(f"{data_dir}/test.npz")
-    rss = torch.from_numpy(data["rss"])
-    theta = torch.from_numpy(data["theta_star"]).view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
+    norm = np.load(f"{data_dir}/norm_stats.npz")
+    dr_raw = data["delta_r"]
+    dr_norm = (dr_raw - norm["delta_r_mean"]) / norm["delta_r_std"]
+    delta_r = torch.from_numpy(dr_norm.astype(np.float32))
+    delta_f = torch.from_numpy(data["delta_f_star"]).view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
 
     # Load Pi
     fm = np.load(f"{data_dir}/forward_model.npz")
@@ -128,13 +131,13 @@ def plot_reconstruction_grid(
     col_names = ["Ground Truth", "Tikhonov-Only", "FC-Only", "Proposed"]
 
     for row, idx in enumerate(indices):
-        y_sample = rss[idx:idx+1].to(device)
-        gt = theta[idx, 0].numpy()
+        dr_sample = delta_r[idx:idx+1].to(device)
+        gt = delta_f[idx, 0].numpy()
 
         preds = {}
         with torch.no_grad():
             for name, model in models.items():
-                pred = model(y_sample).cpu().numpy()[0, 0]
+                pred = model(dr_sample).cpu().numpy()[0, 0]
                 preds[name] = pred
 
         for col, (title, img) in enumerate([
@@ -174,9 +177,13 @@ def plot_error_maps_and_branches(
     """Error maps |pred - GT| + branch intermediate outputs."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # Load test data with z-score normalization
     data = np.load(f"{data_dir}/test.npz")
-    rss = torch.from_numpy(data["rss"])
-    theta = torch.from_numpy(data["theta_star"]).view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
+    norm = np.load(f"{data_dir}/norm_stats.npz")
+    dr_raw = data["delta_r"]
+    dr_norm = (dr_raw - norm["delta_r_mean"]) / norm["delta_r_std"]
+    delta_r = torch.from_numpy(dr_norm.astype(np.float32))
+    delta_f = torch.from_numpy(data["delta_f_star"]).view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
     types = data["target_type"]
 
     fm = np.load(f"{data_dir}/forward_model.npz")
@@ -223,18 +230,18 @@ def plot_error_maps_and_branches(
     col_names2 = ["Ground Truth", "Branch A (Tikhonov)", "Branch B (FC)", "Proposed Output"]
 
     for row, idx in enumerate(indices):
-        y_sample = rss[idx:idx+1].to(device)
-        gt = theta[idx, 0].numpy()
+        dr_sample = delta_r[idx:idx+1].to(device)
+        gt = delta_f[idx, 0].numpy()
 
         with torch.no_grad():
             # Get predictions
-            pred_tik = tik_model(y_sample).cpu().numpy()[0, 0]
-            pred_fc = fc_model(y_sample).cpu().numpy()[0, 0]
-            pred_prop = proposed(y_sample).cpu().numpy()[0, 0]
+            pred_tik = tik_model(dr_sample).cpu().numpy()[0, 0]
+            pred_fc = fc_model(dr_sample).cpu().numpy()[0, 0]
+            pred_prop = proposed(dr_sample).cpu().numpy()[0, 0]
 
             # Get branch intermediate outputs
-            branch_a = proposed.tikhonov(y_sample).cpu().numpy()[0, 0]
-            branch_b = proposed.fc(y_sample).cpu().numpy()[0, 0]
+            branch_a = proposed.tikhonov(dr_sample).cpu().numpy()[0, 0]
+            branch_b = proposed.fc(dr_sample).cpu().numpy()[0, 0]
 
         # Error maps
         vmax_gt = max(gt.max(), 0.01)

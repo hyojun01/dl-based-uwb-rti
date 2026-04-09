@@ -31,7 +31,7 @@ from uwb_rti.models.fc_only import FCOnlyUNet
 # =============================================================================
 
 class CombinedLoss(nn.Module):
-    """Weighted MSE + lambda * (1 - SSIM) loss for SLF reconstruction.
+    """Weighted MSE + lambda * (1 - SSIM) loss for SLF change reconstruction.
 
     Uses pixel-weighting to combat class imbalance (97.6% zero pixels).
     Nonzero target pixels are weighted higher to prevent trivial all-zeros solution.
@@ -46,8 +46,8 @@ class CombinedLoss(nn.Module):
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            pred: Predicted SLF, shape (B, 1, 30, 30).
-            target: Ground truth SLF, shape (B, 1, 30, 30).
+            pred: Predicted SLF change, shape (B, 1, 30, 30).
+            target: Ground truth SLF change, shape (B, 1, 30, 30).
         """
         # Pixel-weighted MSE: upweight nonzero (object) pixels
         weight = torch.where(target > 0, self.object_weight, 1.0)
@@ -62,25 +62,25 @@ class CombinedLoss(nn.Module):
 # =============================================================================
 
 def load_data(data_dir: str = "data") -> tuple[DataLoader, DataLoader, DataLoader, dict]:
-    """Load train/val/test datasets with z-score normalized RSS.
+    """Load train/val/test datasets with z-score normalized RSS difference.
 
     Returns:
         train_loader, val_loader, test_loader, norm_stats.
     """
     # Compute normalization stats from training set
     train_data = np.load(f"{data_dir}/train.npz")
-    rss_mean = train_data["rss"].mean(axis=0)  # (16,) per-link
-    rss_std = train_data["rss"].std(axis=0)    # (16,) per-link
-    norm_stats = {"rss_mean": rss_mean, "rss_std": rss_std}
+    dr_mean = train_data["delta_r"].mean(axis=0)  # (16,) per-link
+    dr_std = train_data["delta_r"].std(axis=0)     # (16,) per-link
+    norm_stats = {"delta_r_mean": dr_mean, "delta_r_std": dr_std}
 
     loaders = []
     for split in ["train", "val", "test"]:
         data = np.load(f"{data_dir}/{split}.npz")
-        rss = (data["rss"] - rss_mean) / rss_std  # z-score normalize
-        rss = torch.from_numpy(rss.astype(np.float32))
-        theta = torch.from_numpy(data["theta_star"])  # (N, 900)
-        theta = theta.view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
-        dataset = TensorDataset(rss, theta)
+        delta_r = (data["delta_r"] - dr_mean) / dr_std  # z-score normalize
+        delta_r = torch.from_numpy(delta_r.astype(np.float32))
+        delta_f = torch.from_numpy(data["delta_f_star"])  # (N, 900)
+        delta_f = delta_f.view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
+        dataset = TensorDataset(delta_r, delta_f)
         shuffle = (split == "train")
         loaders.append(DataLoader(dataset, batch_size=BATCH_SIZE,
                                   shuffle=shuffle, num_workers=2,
@@ -153,25 +153,25 @@ def train_model(
         # Train
         model.train()
         train_loss_sum = 0.0
-        for rss, theta in train_loader:
-            rss, theta = rss.to(device), theta.to(device)
-            pred = model(rss)
-            loss = criterion(pred, theta)
+        for delta_r, delta_f in train_loader:
+            delta_r, delta_f = delta_r.to(device), delta_f.to(device)
+            pred = model(delta_r)
+            loss = criterion(pred, delta_f)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            train_loss_sum += loss.item() * rss.size(0)
+            train_loss_sum += loss.item() * delta_r.size(0)
         train_loss = train_loss_sum / len(train_loader.dataset)
 
         # Validate
         model.eval()
         val_loss_sum = 0.0
         with torch.no_grad():
-            for rss, theta in val_loader:
-                rss, theta = rss.to(device), theta.to(device)
-                pred = model(rss)
-                loss = criterion(pred, theta)
-                val_loss_sum += loss.item() * rss.size(0)
+            for delta_r, delta_f in val_loader:
+                delta_r, delta_f = delta_r.to(device), delta_f.to(device)
+                pred = model(delta_r)
+                loss = criterion(pred, delta_f)
+                val_loss_sum += loss.item() * delta_r.size(0)
         val_loss = val_loss_sum / len(val_loader.dataset)
 
         current_lr = optimizer.param_groups[0]["lr"]
@@ -240,7 +240,7 @@ def train_all(data_dir: str = "data") -> list[dict]:
     train_loader, val_loader, test_loader, norm_stats = load_data(data_dir)
     print(f"Data: {len(train_loader.dataset)} train, "
           f"{len(val_loader.dataset)} val, {len(test_loader.dataset)} test")
-    print(f"RSS normalized: mean subtracted, std divided (per-link)")
+    print(f"RSS difference normalized: mean subtracted, std divided (per-link)")
 
     # Save normalization stats for inference
     np.savez(f"{data_dir}/norm_stats.npz", **norm_stats)

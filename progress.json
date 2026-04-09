@@ -4,246 +4,219 @@
       "id": "1.1",
       "phase": 1,
       "title": "Implement config.py",
-      "description": "All constants: node positions, UWB parameters, pixel grid, parameter ranges",
-      "status": "complete",
-      "verified": true,
-      "notes": "Verified: pixel centers (0.05-2.95), TX-RX distances (3.0-4.24m), wavelength=0.03756m, beta_min=0.001878m, dataset split 48k/6k/6k"
+      "description": "All constants: node positions, UWB parameters, pixel grid, parameter ranges (RSS difference model)",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "1.2",
       "phase": 1,
       "title": "Implement forward_model.py — weight matrix W",
-      "description": "Inverse Area Elliptical Model, compute W (16×900) with β bounds and Fresnel zone",
-      "status": "complete",
-      "verified": true,
-      "notes": "W (16x900) verified: ~10% nonzero, pixel area factor included for discrete summation, max weight 1.07, sum per link 1.2-2.3"
+      "description": "Inverse Area Elliptical Model, compute W (16x900) with beta bounds and Fresnel zone",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "1.3",
       "phase": 1,
-      "title": "Implement forward_model.py — Tikhonov matrix Π",
-      "description": "Π = (W^T W + α·I)^{-1} · W^T, verify dimensions (900×16)",
-      "status": "complete",
-      "verified": true,
-      "notes": "Pi (900x16) verified: uses np.linalg.solve for numerical stability, synthetic reconstruction shows spatial prior (center 0.12 vs background 0.008)"
+      "title": "Implement forward_model.py — Tikhonov matrix Pi",
+      "description": "Pi = (W^T W + alpha*I)^{-1} * W^T, verify dimensions (900x16)",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "1.4",
       "phase": 1,
-      "title": "Implement forward_model.py — RSS generation",
-      "description": "y = Z·b - c·W·θ - α·d + ε, with parameter sampling",
-      "status": "complete",
-      "verified": true,
-      "notes": "RSS verified: empty room ~86dB, 5x5 object drops ~1dB, shadowing max ~6dB. Parameters sampled from config ranges."
+      "title": "Implement forward_model.py — RSS difference generation",
+      "description": "delta_R = c*W*delta_f_A + epsilon, with noise sampling",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "2.1",
       "phase": 2,
-      "title": "Validation: RSS vs Distance (no shadowing)",
-      "description": "1 TX, 1 RX, vary D from 0.5m to 5m, plot theoretical RSS curve",
-      "status": "complete",
-      "verified": true,
-      "verification_criteria": "RSS decreases logarithmically with distance",
-      "notes": "RSS 100.7dB@0.5m → 81.7dB@5m, monotonically decreasing. Plot: val1_rss_vs_distance.png"
+      "title": "Validation: RSS difference vs object attenuation",
+      "description": "1 TX, 1 RX, object at midpoint, vary attenuation 0.1-1.0. Verify linear relationship.",
+      "status": "pending",
+      "verified": false,
+      "verification_criteria": "RSS difference increases linearly with attenuation (R > 0.999)"
     },
     {
       "id": "2.2",
       "phase": 2,
-      "title": "Validation: RSS during human crossing",
-      "description": "Person (0.4m×0.4m, θ*=0.7) crosses LOS at midpoint, plot RSS vs x-position",
-      "status": "complete",
-      "verified": true,
-      "verification_criteria": "RSS dip when person crosses LOS, max attenuation at x=0",
-      "notes": "Max dip 0.32dB at x=-0.05m (near LOS). Plot: val2_human_crossing.png"
+      "title": "Validation: RSS difference during human crossing",
+      "description": "Person (0.4m x 0.4m, delta_f=0.7) crosses LOS at midpoint. Verify peak at LOS.",
+      "status": "pending",
+      "verified": false,
+      "verification_criteria": "RSS difference peaks when person crosses LOS, max near x=0"
     },
     {
       "id": "2.3",
       "phase": 2,
       "title": "Visualize weight matrix W",
-      "description": "Reshape weight vectors to 30×30 for representative links, verify elliptical shape",
-      "status": "complete",
-      "verified": true,
-      "notes": "4 links visualized: edge, center, diagonal, off-center. Elliptical LOS patterns confirmed. Plot: val3_weight_matrix.png"
+      "description": "Reshape weight vectors to 30x30 for representative links, verify elliptical shape",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "2.4",
       "phase": 2,
       "title": "Visualize Tikhonov reconstruction",
-      "description": "Apply Π·y for sample inputs, verify spatial prior quality",
-      "status": "complete",
-      "verified": true,
-      "notes": "3 targets tested (person, two objects, wall). Blurry but spatially correct. Plot: val4_tikhonov_reconstruction.png"
+      "description": "Apply Pi to synthetic RSS difference for sample inputs, verify spatial prior quality",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "3.1",
       "phase": 3,
-      "title": "Implement SLF target generation",
+      "title": "Implement SLF change target generation",
       "description": "10 target types: person, table, chair, cabinet, wall, L/T-shaped, circular, multiple, empty",
-      "status": "complete",
-      "verified": true,
-      "notes": "All 10 types verified: pixel counts range 0 (empty) to 56 (table), attenuation values match specs"
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "3.2",
       "phase": 3,
       "title": "Implement spatially correlated noise",
-      "description": "Gaussian noise with covariance C_θ(k,l) = σ_θ² · exp(-D_kl/κ)",
-      "status": "complete",
-      "verified": true,
-      "notes": "Cholesky factorization of covariance skeleton, sigma_theta sampled per sample U(0.01,0.05)"
+      "description": "Gaussian noise with covariance Sigma_f(k,l) = sigma_f^2 * exp(-D_kl/kappa)",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "3.3",
       "phase": 3,
       "title": "Implement full data pipeline",
-      "description": "Generate 60,000 samples (48k/6k/6k split), save as dataset",
-      "status": "complete",
-      "verified": true,
-      "notes": "60k samples in 87s. Balanced types (~6k each). RSS mean=84.7dB, std=3.7dB. Saved as train/val/test.npz"
+      "description": "Generate 60,000 samples (48k/6k/6k split), save as dataset with delta_r and delta_f_star keys",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "3.4",
       "phase": 3,
       "title": "Verify data quality",
-      "description": "Visualize sample SLFs, RSS distributions, check for anomalies",
-      "status": "complete",
-      "verified": true,
-      "notes": "Type balance verified (~6k each), RSS range 73-96dB, no anomalies, 2.4% nonzero SLF pixels"
+      "description": "Visualize sample SLFs, RSS difference distributions, check for anomalies",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "4.1",
       "phase": 4,
       "title": "Implement Tikhonov branch",
-      "description": "Fixed Π·y, registered as buffer, no learnable params",
-      "status": "complete",
-      "verified": true,
-      "notes": "Pi as register_buffer, 0 trainable params confirmed"
+      "description": "Fixed Pi*delta_r, registered as buffer, no learnable params",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "4.2",
       "phase": 4,
       "title": "Implement FC branch",
-      "description": "FC(16→900), init W_fc=Π, linear (no activation)",
-      "status": "complete",
-      "verified": true,
-      "notes": "15,300 params, FC init matches Pi (transfer learning)"
+      "description": "FC(16->900), init W_fc=Pi, linear (no activation)",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "4.3",
       "phase": 4,
       "title": "Implement U-Net",
-      "description": "2-level encoder, bottleneck, decoder with skip connections. Handle 30→15→7 size mismatch",
-      "status": "complete",
-      "verified": true,
-      "notes": "Pad 30->32 with reflect, ConvTranspose2d for upsampling, crop back to 30. ~1.86M params"
+      "description": "2-level encoder, bottleneck, decoder with skip connections. Handle 30->15->7 size mismatch",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "4.4",
       "phase": 4,
       "title": "Implement Dual-Branch U-Net (proposed)",
-      "description": "Concat Tikhonov + FC → 2ch → U-Net → 1ch output",
-      "status": "complete",
-      "verified": true,
-      "notes": "1,880,133 trainable params total, output (B,1,30,30) verified"
+      "description": "Concat Tikhonov + FC -> 2ch -> U-Net -> 1ch output",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "4.5",
       "phase": 4,
       "title": "Implement ablation models",
       "description": "Tikhonov-Only + U-Net (1ch input), FC-Only + U-Net (1ch input)",
-      "status": "complete",
-      "verified": true,
-      "notes": "Both use same UNet class with in_channels=1. TikOnly: 1.86M, FCOnly: 1.88M"
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "4.6",
       "phase": 4,
       "title": "Verify model architectures",
-      "description": "Forward pass with dummy data, check output shapes, param counts (~1.55M for U-Net)",
-      "status": "complete",
-      "verified": true,
-      "notes": "All 3 models pass forward with batch=4, correct shapes, Pi frozen, FC init=Pi"
+      "description": "Forward pass with dummy data, check output shapes, param counts",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "5.1",
       "phase": 5,
       "title": "Implement training loop",
-      "description": "MSE + λ·(1-SSIM) loss, Adam, ReduceLROnPlateau, early stopping",
-      "status": "complete",
-      "verified": true,
-      "notes": "Weighted MSE (object_weight=20) + SSIM. Z-score RSS normalization. Early stopping min_delta=1e-6. Flush=True for print."
+      "description": "Weighted MSE + lambda*(1-SSIM) loss, Adam, ReduceLROnPlateau, early stopping",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "5.2",
       "phase": 5,
       "title": "Train proposed model",
-      "description": "End-to-end: Π frozen, FC + U-Net trained. Log to experiments/",
-      "status": "complete",
-      "verified": true,
-      "notes": "exp_004: val=0.171983 @ ep 22, 42 epochs, 893s. Retrained with z-score RSS + weighted loss."
+      "description": "End-to-end: Pi frozen, FC + U-Net trained. Log to experiments/",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "5.3",
       "phase": 5,
       "title": "Train Tikhonov-Only ablation",
-      "description": "Same config, same data split. Π frozen, U-Net only trained",
-      "status": "complete",
-      "verified": true,
-      "notes": "exp_005: val=0.171734 @ ep 23, 43 epochs, 910s."
+      "description": "Same config, same data split. Pi frozen, U-Net only trained",
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "5.4",
       "phase": 5,
       "title": "Train FC-Only ablation",
       "description": "Same config, same data split. FC + U-Net trained",
-      "status": "complete",
-      "verified": true,
-      "notes": "exp_006: val=0.172555 @ ep 24, 44 epochs, 930s."
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "6.1",
       "phase": 6,
       "title": "Evaluate all models on test set",
       "description": "Compute MSE, PSNR, SSIM, RMSE for all 3 models on same test set",
-      "status": "complete",
-      "verified": true,
-      "notes": "Proposed MSE=0.0178 PSNR=21.1 SSIM=0.623; TikOnly MSE=0.0183 PSNR=21.1 SSIM=0.620; FCOnly MSE=0.0207 PSNR=19.6 SSIM=0.571"
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "6.2",
       "phase": 6,
       "title": "Cross-model comparison",
       "description": "Quantitative table + statistical analysis of component contributions",
-      "status": "complete",
-      "verified": true,
-      "notes": "Proposed best overall. FC branch adds ~3% MSE improvement over TikOnly. Tikhonov prior critical (FCOnly 16% worse). See trivial_solution_analysis.md."
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "7.1",
       "phase": 7,
       "title": "Training curves",
       "description": "Loss vs epoch for all 3 models",
-      "status": "complete",
-      "verified": true,
-      "notes": "Plot: training_curves.png. All models early-stop ~42 epochs."
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "7.2",
       "phase": 7,
       "title": "Reconstruction comparison grid",
       "description": "Ground truth, Tikhonov-Only, FC-Only, Proposed side-by-side",
-      "status": "complete",
-      "verified": true,
-      "notes": "Plot: reconstruction_grid.png. Models produce meaningful spatial reconstructions after fix."
+      "status": "pending",
+      "verified": false
     },
     {
       "id": "7.3",
       "phase": 7,
       "title": "Error maps and branch analysis",
       "description": "|predicted - ground truth| for each method + Branch A/B intermediate outputs",
-      "status": "complete",
-      "verified": true,
-      "notes": "Plots: error_maps.png, branch_analysis.png. Branch A provides physics prior, Branch B learns complementary mapping."
+      "status": "pending",
+      "verified": false
     }
   ]
 }

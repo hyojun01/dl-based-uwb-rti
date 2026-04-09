@@ -1,7 +1,7 @@
 """Training data generation for UWB RTI.
 
-Generates 60,000 samples: SLF targets with spatially correlated noise,
-RSS measurements via forward model, and Tikhonov initial estimates.
+Generates 60,000 samples: SLF change targets with spatially correlated noise,
+RSS difference measurements via forward model, and Tikhonov initial estimates.
 """
 
 import numpy as np
@@ -13,14 +13,13 @@ from uwb_rti.config import (
     AREA_WIDTH, AREA_HEIGHT, N_LINKS,
     SLF_NOISE_STD_RANGE, SLF_SPATIAL_CORR_LENGTH, SLF_EDGE_MARGIN,
     SCALING_CONSTANT_C,
-    BIAS_RANGE, PATH_LOSS_EXPONENT_RANGE, NOISE_STD_RANGE,
+    NOISE_STD_RANGE,
     DATASET_TOTAL, DATASET_TRAIN, DATASET_VAL, DATASET_TEST,
     DATA_SPLIT_SEED, RANDOM_SEED,
 )
 from uwb_rti.forward_model import (
     compute_weight_matrix,
     compute_tikhonov_matrix,
-    compute_log_distances,
 )
 
 
@@ -31,8 +30,8 @@ from uwb_rti.forward_model import (
 def compute_noise_covariance() -> np.ndarray:
     """Precompute spatial noise covariance skeleton C(k,l) = exp(-D_kl / kappa).
 
-    The actual covariance is sigma_theta^2 * C. We factor out sigma_theta
-    so we can reuse C across samples with different sigma_theta values.
+    The actual covariance is sigma_f^2 * C. We factor out sigma_f
+    so we can reuse C across samples with different sigma_f values.
 
     Returns:
         C_skeleton: Shape (K, K), dtype float64.
@@ -59,7 +58,7 @@ def compute_noise_cholesky(C_skeleton: np.ndarray) -> np.ndarray:
 # SLF Target Generators
 # =============================================================================
 
-def _place_rect(theta: np.ndarray, cx: float, cy: float,
+def _place_rect(delta_f: np.ndarray, cx: float, cy: float,
                 w: float, h: float, value: float) -> None:
     """Place a rectangular object on the SLF grid (in-place)."""
     x_min, x_max = cx - w / 2, cx + w / 2
@@ -67,16 +66,16 @@ def _place_rect(theta: np.ndarray, cx: float, cy: float,
     for k in range(K):
         px, py = PIXEL_CENTERS[k]
         if x_min <= px <= x_max and y_min <= py <= y_max:
-            theta[k] = max(theta[k], value)
+            delta_f[k] = max(delta_f[k], value)
 
 
-def _place_circle(theta: np.ndarray, cx: float, cy: float,
+def _place_circle(delta_f: np.ndarray, cx: float, cy: float,
                   radius: float, value: float) -> None:
     """Place a circular object on the SLF grid (in-place)."""
     for k in range(K):
         px, py = PIXEL_CENTERS[k]
         if (px - cx)**2 + (py - cy)**2 <= radius**2:
-            theta[k] = max(theta[k], value)
+            delta_f[k] = max(delta_f[k], value)
 
 
 def _random_center(rng: np.random.Generator,
@@ -90,62 +89,62 @@ def _random_center(rng: np.random.Generator,
 
 def generate_person_standing(rng: np.random.Generator) -> np.ndarray:
     """Person standing: ~0.4m x 0.4m, attenuation U(0.5, 1.0)."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     w = rng.uniform(0.35, 0.45)
     h = rng.uniform(0.35, 0.45)
     value = rng.uniform(0.5, 1.0)
     cx, cy = _random_center(rng, w, h)
-    _place_rect(theta, cx, cy, w, h, value)
-    return theta
+    _place_rect(delta_f, cx, cy, w, h, value)
+    return delta_f
 
 
 def generate_person_walking(rng: np.random.Generator) -> np.ndarray:
     """Person walking: ~0.3m x 0.5m, attenuation U(0.5, 1.0)."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     w = rng.uniform(0.25, 0.35)
     h = rng.uniform(0.45, 0.55)
     value = rng.uniform(0.5, 1.0)
     cx, cy = _random_center(rng, w, h)
-    _place_rect(theta, cx, cy, w, h, value)
-    return theta
+    _place_rect(delta_f, cx, cy, w, h, value)
+    return delta_f
 
 
 def generate_table(rng: np.random.Generator) -> np.ndarray:
     """Table/desk: ~0.8m x 0.6m, attenuation U(0.3, 0.6)."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     w = rng.uniform(0.7, 0.9)
     h = rng.uniform(0.5, 0.7)
     value = rng.uniform(0.3, 0.6)
     cx, cy = _random_center(rng, w, h)
-    _place_rect(theta, cx, cy, w, h, value)
-    return theta
+    _place_rect(delta_f, cx, cy, w, h, value)
+    return delta_f
 
 
 def generate_chair(rng: np.random.Generator) -> np.ndarray:
     """Chair: ~0.4m x 0.4m, attenuation U(0.3, 0.5)."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     w = rng.uniform(0.35, 0.45)
     h = rng.uniform(0.35, 0.45)
     value = rng.uniform(0.3, 0.5)
     cx, cy = _random_center(rng, w, h)
-    _place_rect(theta, cx, cy, w, h, value)
-    return theta
+    _place_rect(delta_f, cx, cy, w, h, value)
+    return delta_f
 
 
 def generate_cabinet(rng: np.random.Generator) -> np.ndarray:
     """Cabinet/shelf: ~0.5m x 0.3m, attenuation U(0.5, 0.8)."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     w = rng.uniform(0.45, 0.55)
     h = rng.uniform(0.25, 0.35)
     value = rng.uniform(0.5, 0.8)
     cx, cy = _random_center(rng, w, h)
-    _place_rect(theta, cx, cy, w, h, value)
-    return theta
+    _place_rect(delta_f, cx, cy, w, h, value)
+    return delta_f
 
 
 def generate_wall(rng: np.random.Generator) -> np.ndarray:
     """Wall segment: ~0.1m x 1.0m, attenuation U(0.6, 1.0)."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     # Random orientation: horizontal or vertical
     if rng.random() < 0.5:
         w, h = rng.uniform(0.08, 0.12), rng.uniform(0.8, 1.2)
@@ -153,18 +152,18 @@ def generate_wall(rng: np.random.Generator) -> np.ndarray:
         w, h = rng.uniform(0.8, 1.2), rng.uniform(0.08, 0.12)
     value = rng.uniform(0.6, 1.0)
     cx, cy = _random_center(rng, w, h)
-    _place_rect(theta, cx, cy, w, h, value)
-    return theta
+    _place_rect(delta_f, cx, cy, w, h, value)
+    return delta_f
 
 
 def generate_empty(rng: np.random.Generator) -> np.ndarray:
-    """Empty room: all zeros."""
+    """Empty room: all zeros (no change from baseline)."""
     return np.zeros(K, dtype=np.float64)
 
 
 def generate_l_shaped(rng: np.random.Generator) -> np.ndarray:
     """L-shaped or T-shaped composite object."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     value = rng.uniform(0.4, 0.8)
     base_w = rng.uniform(0.6, 0.9)
     base_h = rng.uniform(0.15, 0.25)
@@ -173,31 +172,31 @@ def generate_l_shaped(rng: np.random.Generator) -> np.ndarray:
 
     cx, cy = _random_center(rng, base_w, base_h + arm_h)
     # Horizontal base
-    _place_rect(theta, cx, cy - arm_h / 2, base_w, base_h, value)
+    _place_rect(delta_f, cx, cy - arm_h / 2, base_w, base_h, value)
     # Vertical arm (left side for L, center for T)
     if rng.random() < 0.5:
         arm_cx = cx - base_w / 2 + arm_w / 2
     else:
         arm_cx = cx
-    _place_rect(theta, arm_cx, cy + base_h / 2, arm_w, arm_h, value)
-    return theta
+    _place_rect(delta_f, arm_cx, cy + base_h / 2, arm_w, arm_h, value)
+    return delta_f
 
 
 def generate_circular(rng: np.random.Generator) -> np.ndarray:
     """Circular object (pillar): radius ~0.2-0.3m."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     radius = rng.uniform(0.2, 0.3)
     value = rng.uniform(0.4, 0.8)
     margin = SLF_EDGE_MARGIN
     cx = rng.uniform(margin + radius, AREA_WIDTH - margin - radius)
     cy = rng.uniform(margin + radius, AREA_HEIGHT - margin - radius)
-    _place_circle(theta, cx, cy, radius, value)
-    return theta
+    _place_circle(delta_f, cx, cy, radius, value)
+    return delta_f
 
 
 def generate_multiple(rng: np.random.Generator) -> np.ndarray:
     """Combination of 2-3 random objects."""
-    theta = np.zeros(K, dtype=np.float64)
+    delta_f = np.zeros(K, dtype=np.float64)
     single_generators = [
         generate_person_standing, generate_person_walking,
         generate_table, generate_chair, generate_cabinet,
@@ -207,8 +206,8 @@ def generate_multiple(rng: np.random.Generator) -> np.ndarray:
     for _ in range(n_objects):
         gen = rng.choice(single_generators)
         obj = gen(rng)
-        theta = np.maximum(theta, obj)
-    return theta
+        delta_f = np.maximum(delta_f, obj)
+    return delta_f
 
 
 # All target generators indexed by type
@@ -233,40 +232,31 @@ TARGET_GENERATORS = [
 def generate_single_sample(
     W: np.ndarray,
     Pi: np.ndarray,
-    d_log: np.ndarray,
     L_noise: np.ndarray,
     rng: np.random.Generator,
 ) -> dict:
     """Generate one complete training sample.
 
-    Returns dict with keys: theta_star, theta, rss, tikhonov_recon, target_type.
+    Returns dict with keys: delta_f_star, delta_r, target_type.
     """
     # Pick target type
     type_idx = rng.integers(0, len(TARGET_GENERATORS))
-    theta_star = TARGET_GENERATORS[type_idx](rng)
+    delta_f_star = TARGET_GENERATORS[type_idx](rng)
 
-    # Add spatially correlated noise
-    sigma_theta = rng.uniform(*SLF_NOISE_STD_RANGE)
+    # Add spatially correlated noise: f̃_A ~ N(0, σ_f² · Σ)
+    sigma_f = rng.uniform(*SLF_NOISE_STD_RANGE)
     z = rng.standard_normal(K)
-    theta_tilde = sigma_theta * (L_noise @ z)
-    theta = theta_star + theta_tilde
+    f_tilde = sigma_f * (L_noise @ z)
+    delta_f = delta_f_star + f_tilde
 
-    # Generate RSS: y = b - c*W*theta - alpha*d + epsilon
-    b = rng.uniform(*BIAS_RANGE, size=N_LINKS)
-    alpha_pl = rng.uniform(*PATH_LOSS_EXPONENT_RANGE)
+    # Generate RSS difference: ΔR = c · W · Δf_A + ε
     sigma_eps = rng.uniform(*NOISE_STD_RANGE)
     epsilon = rng.normal(0.0, sigma_eps, size=N_LINKS)
-
-    shadowing = SCALING_CONSTANT_C * (W @ theta)
-    rss = b - shadowing - alpha_pl * d_log + epsilon
-
-    # Tikhonov initial estimate
-    tikhonov_recon = Pi @ rss
+    delta_r = SCALING_CONSTANT_C * (W @ delta_f) + epsilon
 
     return {
-        "theta_star": theta_star.astype(np.float32),
-        "rss": rss.astype(np.float32),
-        "tikhonov_recon": tikhonov_recon.astype(np.float32),
+        "delta_f_star": delta_f_star.astype(np.float32),
+        "delta_r": delta_r.astype(np.float32),
         "target_type": type_idx,
     }
 
@@ -292,25 +282,22 @@ def generate_dataset(
     print("Precomputing forward model components...")
     W = compute_weight_matrix()
     Pi = compute_tikhonov_matrix(W)
-    d_log = compute_log_distances()
 
     print("Precomputing noise covariance Cholesky...")
     C_skeleton = compute_noise_covariance()
     L_noise = compute_noise_cholesky(C_skeleton)
 
     # Allocate arrays
-    all_theta_star = np.zeros((n_samples, K), dtype=np.float32)
-    all_rss = np.zeros((n_samples, N_LINKS), dtype=np.float32)
-    all_tikhonov = np.zeros((n_samples, K), dtype=np.float32)
+    all_delta_f_star = np.zeros((n_samples, K), dtype=np.float32)
+    all_delta_r = np.zeros((n_samples, N_LINKS), dtype=np.float32)
     all_types = np.zeros(n_samples, dtype=np.int32)
 
     print(f"Generating {n_samples} samples...")
     t0 = time.time()
     for i in range(n_samples):
-        sample = generate_single_sample(W, Pi, d_log, L_noise, rng)
-        all_theta_star[i] = sample["theta_star"]
-        all_rss[i] = sample["rss"]
-        all_tikhonov[i] = sample["tikhonov_recon"]
+        sample = generate_single_sample(W, Pi, L_noise, rng)
+        all_delta_f_star[i] = sample["delta_f_star"]
+        all_delta_r[i] = sample["delta_r"]
         all_types[i] = sample["target_type"]
 
         if (i + 1) % 10000 == 0:
@@ -334,15 +321,14 @@ def generate_dataset(
     for name, idx in [("train", train_idx), ("val", val_idx), ("test", test_idx)]:
         np.savez_compressed(
             save_path / f"{name}.npz",
-            theta_star=all_theta_star[idx],
-            rss=all_rss[idx],
-            tikhonov_recon=all_tikhonov[idx],
+            delta_f_star=all_delta_f_star[idx],
+            delta_r=all_delta_r[idx],
             target_type=all_types[idx],
         )
         print(f"Saved {name}.npz: {len(idx)} samples")
 
     # Save forward model matrices
-    np.savez(save_path / "forward_model.npz", W=W, Pi=Pi, d_log=d_log)
+    np.savez(save_path / "forward_model.npz", W=W, Pi=Pi)
     print("Saved forward_model.npz")
 
     # Type distribution
@@ -358,9 +344,9 @@ def generate_dataset(
         "generation_time_sec": round(gen_time, 1),
         "split": {"train": len(train_idx), "val": len(val_idx), "test": len(test_idx)},
         "type_distribution": type_counts,
-        "rss_mean": float(all_rss.mean()),
-        "rss_std": float(all_rss.std()),
-        "theta_star_nonzero_frac": float((all_theta_star > 0).mean()),
+        "delta_r_mean": float(all_delta_r.mean()),
+        "delta_r_std": float(all_delta_r.std()),
+        "delta_f_star_nonzero_frac": float((all_delta_f_star > 0).mean()),
     }
     return stats
 

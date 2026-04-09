@@ -58,11 +58,11 @@ def evaluate_model(
     all_target = []
 
     with torch.no_grad():
-        for rss, theta in test_loader:
-            rss = rss.to(device)
-            pred = model(rss)
+        for delta_r, delta_f in test_loader:
+            delta_r = delta_r.to(device)
+            pred = model(delta_r)
             all_pred.append(pred.cpu())
-            all_target.append(theta)
+            all_target.append(delta_f)
 
     pred = torch.cat(all_pred, dim=0)
     target = torch.cat(all_target, dim=0)
@@ -77,11 +77,11 @@ def evaluate_all(data_dir: str = "data", ckpt_dir: str = "checkpoints") -> dict:
     # Load test data with normalization
     data = np.load(f"{data_dir}/test.npz")
     norm = np.load(f"{data_dir}/norm_stats.npz")
-    rss_raw = data["rss"]
-    rss_norm = (rss_raw - norm["rss_mean"]) / norm["rss_std"]
-    rss = torch.from_numpy(rss_norm.astype(np.float32))
-    theta = torch.from_numpy(data["theta_star"]).view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
-    test_loader = DataLoader(TensorDataset(rss, theta), batch_size=BATCH_SIZE,
+    dr_raw = data["delta_r"]
+    dr_norm = (dr_raw - norm["delta_r_mean"]) / norm["delta_r_std"]
+    delta_r = torch.from_numpy(dr_norm.astype(np.float32))
+    delta_f = torch.from_numpy(data["delta_f_star"]).view(-1, 1, N_PIXELS_Y, N_PIXELS_X)
+    test_loader = DataLoader(TensorDataset(delta_r, delta_f), batch_size=BATCH_SIZE,
                              num_workers=2, pin_memory=True)
 
     # Load Pi

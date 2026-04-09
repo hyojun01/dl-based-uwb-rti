@@ -1,54 +1,30 @@
 {
   "project": "uwb-rti",
-  "current_phase": 7,
-  "phase_name": "visualization",
-  "status": "complete",
+  "current_phase": 1,
+  "phase_name": "forward-model",
+  "status": "not_started",
   "phases": {
     "1": {
       "name": "forward-model",
-      "status": "complete",
+      "status": "not_started",
       "modules": ["config.py", "forward_model.py"],
-      "results": {
-        "W_shape": [16, 900],
-        "Pi_shape": [900, 16],
-        "W_nonzero_pct": 9.9,
-        "rss_empty_room_mean_dB": 86,
-        "pixel_area_correction": true
-      }
+      "results": {}
     },
     "2": {
       "name": "model-validation",
-      "status": "complete",
+      "status": "not_started",
       "modules": ["validate_model.py"],
-      "results": {
-        "val1_monotonic": true,
-        "val2_dip_near_los": true,
-        "val3_elliptical_patterns": true,
-        "val4_spatial_prior": true
-      },
-      "validations": {
-        "rss_vs_distance": "pass",
-        "rss_human_crossing": "pass"
-      }
+      "results": {}
     },
     "3": {
       "name": "data-generation",
-      "status": "complete",
+      "status": "not_started",
       "modules": ["data_generator.py"],
-      "results": {
-        "rss_mean_dB": 84.7,
-        "rss_std_dB": 3.7,
-        "type_balance": "uniform_~6k_each"
-      },
-      "dataset": {
-        "total_samples": 60000,
-        "split": { "train": 48000, "val": 6000, "test": 6000 },
-        "generation_time_sec": 87.2
-      }
+      "results": {}
     },
     "4": {
       "name": "dl-components",
-      "status": "complete",
+      "status": "not_started",
       "modules": [
         "models/tikhonov_branch.py",
         "models/fc_branch.py",
@@ -61,36 +37,21 @@
     },
     "5": {
       "name": "training",
-      "status": "complete",
+      "status": "not_started",
       "modules": ["train.py"],
-      "results": {
-        "fix_applied": "z-score RSS normalization + weighted MSE (object_weight=20)",
-        "early_stopping_fix": "min_delta=1e-6"
-      },
-      "training_runs": ["exp_004", "exp_005", "exp_006"]
+      "results": {}
     },
     "6": {
       "name": "evaluation",
-      "status": "complete",
+      "status": "not_started",
       "modules": ["evaluate.py"],
-      "results": {
-        "proposed_best": true,
-        "fc_branch_contribution": "~3% MSE improvement over TikOnly",
-        "tikhonov_prior_critical": "FCOnly 16% worse MSE than Proposed"
-      },
-      "metrics": {
-        "proposed": { "mse": 0.0178, "psnr": 21.1, "ssim": 0.623, "rmse": 0.133 },
-        "tikhonov_only": { "mse": 0.0183, "psnr": 21.1, "ssim": 0.620, "rmse": 0.135 },
-        "fc_only": { "mse": 0.0207, "psnr": 19.6, "ssim": 0.571, "rmse": 0.144 }
-      }
+      "results": {}
     },
     "7": {
       "name": "visualization",
-      "status": "complete",
+      "status": "not_started",
       "modules": ["visualize.py"],
-      "results": {
-        "figures": ["training_curves.png", "reconstruction_grid.png", "error_maps.png", "branch_analysis.png"]
-      }
+      "results": {}
     }
   },
   "active_hyperparameters": {
@@ -103,12 +64,6 @@
     "scheduler_patience": 10,
     "scheduler_factor": 0.5
   },
-  "decisions_log": [
-    {
-      "date": "2026-04-08",
-      "finding": "All 3 models converge to trivial solution (predict zeros). MSE = MSE(all_zeros). Root causes: (1) 97.6% zero pixels dominate MSE, (2) shadowing = 4.8% of RSS variance, (3) branch outputs 163x larger than targets.",
-      "action": "Apply z-score RSS normalization + pixel-weighted MSE loss. Retrain all 3 models."
-    }
-  ],
+  "decisions_log": [],
   "last_updated": "2026-04-09T00:00:00Z"
 }

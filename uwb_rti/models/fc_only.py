@@ -13,7 +13,7 @@ from uwb_rti.models.unet import UNet
 
 
 class FCOnlyUNet(nn.Module):
-    """Ablation: FC -> 1ch -> U-Net -> SLF (1ch)."""
+    """Ablation: FC -> 1ch -> U-Net -> Δf_hat (1ch)."""
 
     def __init__(self, Pi: torch.Tensor) -> None:
         """
@@ -24,6 +24,6 @@ class FCOnlyUNet(nn.Module):
         self.fc = FCBranch(Pi)
         self.unet = UNet(in_channels=1)
 
-    def forward(self, y: torch.Tensor) -> torch.Tensor:
-        fc_out = self.fc(y)          # (B, 1, 30, 30)
-        return self.unet(fc_out)     # (B, 1, 30, 30)
+    def forward(self, delta_r: torch.Tensor) -> torch.Tensor:
+        fc_out = self.fc(delta_r)          # (B, 1, 30, 30)
+        return self.unet(fc_out)           # (B, 1, 30, 30)

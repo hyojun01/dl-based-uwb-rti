@@ -69,17 +69,15 @@ BETA_MIN = WAVELENGTH / 20   # Small positive guard (~0.001878 m)
 # BETA_MAX is link-dependent: sqrt(WAVELENGTH * d_{n,m} / 4), computed per link
 
 # =============================================================================
-# RSS Forward Model Parameter Ranges (Wu et al. 2020, Section IV-A)
+# RSS Difference Forward Model Parameter Ranges (Wu et al. 2024, Section 5.1)
 # =============================================================================
-BIAS_RANGE = (90.0, 100.0)           # b_i ~ U(90, 100) [dB]
-PATH_LOSS_EXPONENT_RANGE = (0.9, 1.0)  # alpha ~ U(0.9, 1.0)
 NOISE_STD_RANGE = (0.3, 3.0)         # sigma_epsilon ~ U(0.3, 3.0) [dB]
 
 # =============================================================================
-# SLF (Spatial Loss Field) Parameters
+# SLF (Spatial Loss Field) Change Parameters
 # =============================================================================
-SLF_ATTENUATION_RANGE = (0.3, 1.0)   # theta*_k ~ U(0.3, 1.0) for object regions
-SLF_NOISE_STD_RANGE = (0.01, 0.05)   # sigma_theta ~ U(0.01, 0.05)
+SLF_ATTENUATION_RANGE = (0.3, 1.0)   # Δf*_{A,k} ~ U(0.3, 1.0) for object regions
+SLF_NOISE_STD_RANGE = (0.01, 0.05)   # sigma_f ~ U(0.01, 0.05)
 SLF_SPATIAL_CORR_LENGTH = 0.21       # kappa [m]
 SLF_EDGE_MARGIN = 0.2                # Object placement margin from edges [m]
 

@@ -13,7 +13,7 @@ from uwb_rti.models.unet import UNet
 
 
 class DualBranchUNet(nn.Module):
-    """Proposed: Tikhonov + FC -> concat (2ch) -> U-Net -> SLF (1ch)."""
+    """Proposed: Tikhonov + FC -> concat (2ch) -> U-Net -> Δf_hat (1ch)."""
 
     def __init__(self, Pi: torch.Tensor) -> None:
         """
@@ -25,15 +25,15 @@ class DualBranchUNet(nn.Module):
         self.fc = FCBranch(Pi)
         self.unet = UNet(in_channels=2)
 
-    def forward(self, y: torch.Tensor) -> torch.Tensor:
+    def forward(self, delta_r: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            y: RSS vector of shape (batch, 16).
+            delta_r: RSS difference vector of shape (batch, 16).
 
         Returns:
-            Reconstructed SLF of shape (batch, 1, 30, 30).
+            Reconstructed SLF change of shape (batch, 1, 30, 30).
         """
-        tik_out = self.tikhonov(y)   # (B, 1, 30, 30)
-        fc_out = self.fc(y)          # (B, 1, 30, 30)
+        tik_out = self.tikhonov(delta_r)   # (B, 1, 30, 30)
+        fc_out = self.fc(delta_r)          # (B, 1, 30, 30)
         combined = torch.cat([tik_out, fc_out], dim=1)  # (B, 2, 30, 30)
         return self.unet(combined)   # (B, 1, 30, 30)

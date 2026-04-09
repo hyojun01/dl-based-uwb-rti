@@ -1,8 +1,8 @@
-"""UWB RTI forward model: weight matrix, Tikhonov matrix, and RSS generation.
+"""UWB RTI forward model: weight matrix, Tikhonov matrix, and RSS difference generation.
 
 References:
     - Hamilton et al. (2014): Inverse Area Elliptical Model
-    - Wu et al. (2020): RSS measurement model, Eqs. (1)-(5)
+    - Wu et al. (2024): RSS difference model, Section 5.1
 """
 
 import numpy as np
@@ -12,7 +12,7 @@ from uwb_rti.config import (
     N_TX, N_RX, N_LINKS, K,
     WAVELENGTH, BETA_MIN, SCALING_CONSTANT_C, PIXEL_SIZE,
     TIKHONOV_ALPHA_REG,
-    BIAS_RANGE, PATH_LOSS_EXPONENT_RANGE, NOISE_STD_RANGE,
+    NOISE_STD_RANGE,
 )
 
 
@@ -89,56 +89,34 @@ def compute_tikhonov_matrix(W: np.ndarray, alpha: float = TIKHONOV_ALPHA_REG) ->
     return Pi
 
 
-def compute_log_distances() -> np.ndarray:
-    """Compute log-distance vector d = 20 * log10(D) for all TX-RX pairs.
+def generate_rss_difference(W: np.ndarray, delta_f: np.ndarray,
+                            rng: np.random.Generator | None = None) -> tuple[np.ndarray, dict]:
+    """Generate RSS difference vector from the forward model.
 
-    Returns:
-        d: Log-distance vector of shape (N_LINKS,), dtype float64.
-    """
-    d = np.zeros(N_LINKS, dtype=np.float64)
-    for i in range(N_TX):
-        for j in range(N_RX):
-            D = np.linalg.norm(TX_POSITIONS[i] - RX_POSITIONS[j])
-            d[i * N_RX + j] = 20.0 * np.log10(D)
-    return d
+    ΔR = c · W · Δf_A + ε
 
-
-def generate_rss(W: np.ndarray, theta: np.ndarray,
-                 rng: np.random.Generator | None = None) -> tuple[np.ndarray, dict]:
-    """Generate RSS measurement vector from the forward model.
-
-    y = Z*b - c*W*theta - alpha*d + epsilon
-    where Z = I_16 (static nodes, n=1).
+    where Δf_A = Δf*_A + f̃_A (ideal SLF change + spatially correlated noise).
 
     Args:
         W: Weight matrix of shape (N_LINKS, K).
-        theta: SLF vector of shape (K,) — includes noise (theta = theta* + theta_tilde).
+        delta_f: SLF change vector of shape (K,) — includes noise (Δf*_A + f̃_A).
         rng: NumPy random generator for reproducibility.
 
     Returns:
-        y: RSS measurement vector of shape (N_LINKS,).
-        params: Dict of sampled parameters (bias, path_loss_exp, noise_std).
+        delta_r: RSS difference vector of shape (N_LINKS,).
+        params: Dict of sampled parameters (noise_std).
     """
     if rng is None:
         rng = np.random.default_rng()
 
-    # Sample parameters
-    b = rng.uniform(*BIAS_RANGE, size=N_LINKS)           # (16,)
-    alpha_pl = rng.uniform(*PATH_LOSS_EXPONENT_RANGE)     # scalar
+    # Sample measurement noise
     sigma_eps = rng.uniform(*NOISE_STD_RANGE)             # scalar
     epsilon = rng.normal(0.0, sigma_eps, size=N_LINKS)    # (16,)
 
-    # Log-distance
-    d = compute_log_distances()  # (16,)
-
-    # Forward model: y = b - c*W*theta - alpha*d + epsilon
-    # (Z = I_16, so Z*b = b)
-    shadowing = SCALING_CONSTANT_C * (W @ theta)  # (16,)
-    y = b - shadowing - alpha_pl * d + epsilon    # (16,)
+    # Forward model: ΔR = c · W · Δf_A + ε
+    delta_r = SCALING_CONSTANT_C * (W @ delta_f) + epsilon  # (16,)
 
     params = {
-        "bias": b,
-        "path_loss_exponent": alpha_pl,
         "noise_std": sigma_eps,
     }
-    return y, params
+    return delta_r, params
