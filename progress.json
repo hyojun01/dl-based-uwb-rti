@@ -103,48 +103,48 @@
       "phase": 4,
       "title": "Implement Tikhonov branch",
       "description": "Fixed Pi*delta_r, registered as buffer, no learnable params",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "4.2",
       "phase": 4,
       "title": "Implement FC branch",
       "description": "FC(16->900), init W_fc=Pi, linear (no activation)",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "4.3",
       "phase": 4,
       "title": "Implement U-Net",
       "description": "2-level encoder, bottleneck, decoder with skip connections. Handle 30->15->7 size mismatch",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "4.4",
       "phase": 4,
       "title": "Implement Dual-Branch U-Net (proposed)",
       "description": "Concat Tikhonov + FC -> 2ch -> U-Net -> 1ch output",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "4.5",
       "phase": 4,
       "title": "Implement ablation models",
       "description": "Tikhonov-Only + U-Net (1ch input), FC-Only + U-Net (1ch input)",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "4.6",
       "phase": 4,
       "title": "Verify model architectures",
       "description": "Forward pass with dummy data, check output shapes, param counts",
-      "status": "pending",
-      "verified": false
+      "status": "complete",
+      "verified": true
     },
     {
       "id": "5.1",

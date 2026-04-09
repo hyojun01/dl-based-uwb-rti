@@ -1,7 +1,7 @@
 {
   "project": "uwb-rti",
-  "current_phase": 4,
-  "phase_name": "dl-components",
+  "current_phase": 5,
+  "phase_name": "training",
   "status": "in_progress",
   "phases": {
     "1": {
@@ -43,7 +43,7 @@
     },
     "4": {
       "name": "dl-components",
-      "status": "not_started",
+      "status": "complete",
       "modules": [
         "models/tikhonov_branch.py",
         "models/fc_branch.py",
@@ -52,7 +52,13 @@
         "models/tikhonov_only.py",
         "models/fc_only.py"
       ],
-      "results": {}
+      "results": {
+        "proposed_trainable": 1880133,
+        "tikhonov_only_trainable": 1864257,
+        "fc_only_trainable": 1879557,
+        "fc_branch_params": 15300,
+        "unet_pad_strategy": "30->32 reflect pad, crop back"
+      }
     },
     "5": {
       "name": "training",
@@ -84,5 +90,5 @@
     "scheduler_factor": 0.5
   },
   "decisions_log": [],
-  "last_updated": "2026-04-09T12:03:00Z"
+  "last_updated": "2026-04-09T12:04:00Z"
 }
